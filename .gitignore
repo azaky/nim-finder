@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+# Temporary crawled files
+crawler/crawled
+crawler/crawled/*
