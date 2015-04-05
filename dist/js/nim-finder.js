@@ -81,7 +81,7 @@ $(function() {
 
 	function search(q) {
 		// split query
-		splitted = q.split(" ");
+		splitted = q.toLowerCase().split(" ");
 
 		if (isQueryEmpty(splitted)) {
 			$('#search-info').html('');
