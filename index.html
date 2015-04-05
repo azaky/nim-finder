@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html>
-    <!-- MEMO: update me with `git checkout gh-pages && git merge master && git push origin gh-pages` -->
     <head>
         <meta charset="utf-8">
-        <title>Bootstrap Material</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>NIM Finder</title>
         <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
         <link href="dist/css/roboto.min.css" rel="stylesheet">
-        <link href="dist/css/material-fullpalette.min.css" rel="stylesheet">
-        <link href="dist/css/ripples.min.css" rel="stylesheet">
-        <link href="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.css" rel="stylesheet">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="dist/css/material.min.css" rel="stylesheet">
+        <!-- <link href="dist/css/ripples.min.css" rel="stylesheet"> -->
+        <!-- <link href="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.css" rel="stylesheet"> -->
+        <link href="dist/css/chosen.min.css" rel="stylesheet">
         <style>
             .btn {
                 margin-bottom: 4px;
                 white-space: normal;
             }
             #search-result-box {
-                -webkit-column-count: 4;
+                display: flex;
+                flex-wrap: wrap;
+/*                -webkit-column-count: 4;
                 -moz-column-count: 4;
                 column-count: 4;
-/*                display: flex;
-                flex-wrap: wrap;
+                columns: 4;
 */            }
             .search-result {
+                padding: 10px;
                 -webkit-column-break-inside: avoid; /* Chrome, Safari */
                 page-break-inside: avoid;           /* Theoretically FF 20+ */
                 break-inside: avoid-column;         /* IE 11 */
                 display:table;                      /* Actually FF 20+ */                
             }
-            h1 {
-                margin-bottom: 30px;
+            .search-result a {
+                display: flex;
+                flex-wrap: wrap;
+                height: 130px;
+                line-height: 130px;
+                justify-content: center; /* align horizontal */
+                align-items: center; /* align vertical */
             }
 
         </style>
@@ -39,9 +46,9 @@
 
             <div style="margin-top: 40px">
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-8">
                         <div class="well">
-                            <h1>NIM Finder</h1>
+                            <h1 style="margin-bottom: 30px">NIM Finder</h1>
 
                             <div class="form-group has-success">
                                 <input class="form-control floating-label input-lg" id="search-query" type="text" placeholder="Search NIM or Name">
@@ -58,8 +65,16 @@
                             </footer>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="well">
+                            <h1>Filter</h1>
+                            <span>Limit the search only to some faculties or study programs</span>
+                            <div class="form-group has-success">
+                                <select class="form-control" id="filter-select" data-placeholder=" " multiple>
+                                </select>
+                            </div>
+                        </div>
+<!--                         <div class="well">
                             <div class="text-center">
                                 <a class="btn btn-flat btn-lg" data-toggle="collapse" href="#filter-faculty-box" aria-expanded="false" aria-controls="filter-faculty-box">
                                     Filter
@@ -67,7 +82,11 @@
                             </div>
                             <div id="filter-faculty-summary"></div>
                             <div class="collapse in" id="filter-faculty-box"></div>
-                        </div>
+                        </div> -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">
                     </div>
                 </div>
             </div>
@@ -79,6 +98,12 @@
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
         <script src="dist/js/ripples.min.js"></script>
         <script src="dist/js/material.min.js"></script>
-        <script type="text/javascript" src="dist/js/nim-finder.js"></script>
+        <script type="text/javascript">
+            $.material.init();
+        </script>
+        <script src="dist/js/chosen.jquery.min.js"></script>
+        <script src="dist/js/chosen.proto.min.js"></script>
+        <script src="dist/js/cookies.min.js"></script>
+        <script type="text/javascript" src="dist/js/nim-finder.min.js"></script>
     </body>
 </html>

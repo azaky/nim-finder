@@ -2,6 +2,20 @@ var filter = {};
 var allData = {};
 var maxResult = 100;
 
+function loadData(code) {
+	if (allData[code]) return;
+
+	// perform ajax call
+	$.ajax({
+		dataType: "json",
+		url: "./data/" + code + ".json",
+		async: true,
+		success: function(data) {
+			allData[code] = data;
+		}
+	});
+}
+
 $(function() {
 	// List of supported faculties
 	var faculties;
@@ -10,56 +24,50 @@ $(function() {
 
 	$.ajax({
 		dataType: "json",
-		url: "./dist/js/faculties.json",
+		url: "./data/faculties.json",
 		success: function(data) {
 			faculties = data;
 
 			// set up filters
-			html = "";
-			$.each(faculties, function(ifaculty, faculty) {
-				template = '<div class="filter-faculty">' + 
-								'<a class="btn btn-flat btn-sm btn-material-red-500 toggle-faculty" data-toggle="collapse" href="#filter-faculty-'+ faculty.abbr +'" aria-expanded="false" aria-controls="filter-faculty-'+ faculty.abbr +'">' +
-									faculty.name +
-	                            '</a>' +
-	                            	'<div class="collapse" id="filter-faculty-'+ faculty.abbr +'">';
-	            for (i = 0; i < faculty.programs.length; ++i) {
-	            	template += '<div class="checkbox">' +
-	            					'<label>' +
-	            						'<input type="checkbox" class="filter-faculty-checkbox" data-faculty="' + faculty.programs[i].code + '"> ' +
-	            							faculty.programs[i].code + " | " + faculty.programs[i].name +
-	            					'</label>' + 
-	            				'</div>';
-	            }
-	            template += '</div></div>';
-	            html += template;
+			select = $('#filter-select');
+			$.each(faculties, function(i, faculty) {
+				optgroup = '<optgroup label="' + faculty.name + '">'
+				$.each(faculty.programs, function(j, program) {
+					optgroup += '<option value="' + program.code + '">' + program.code + ' | ' + program.name + '</option>';
+				});
+				optgroup += '</optgroup>';
+				select.append(optgroup);
 			});
-			$("#filter-faculty-box").html(html);
+			// if the cookie present, select it
+			if (Cookies('nf_filter')) {
+				s = JSON.parse(Cookies('nf_filter'));
+				if (s) $.each(s, function(i, e) {
+					$('#filter-select option[value="' + e + '"]').prop('selected', true);
+					loadData(e);
+					filter[e] = true;
+				});
+			}
 
-            $.material.init();
+			// introducing chosen.js
+			select.chosen({
+				placeholder_text_multiple: " ",
+				search_contains: true
+			});
 		}
 	});
-	
-	function updateFilter() {
-		html = "";
-		$.each(filter, function(i, f) {
-			if (f) html += '<span class="label label-info">' + i + '</span> ';
-		});
-		$('#filter-faculty-summary').html(html);
-	}
 
-	function loadData(code) {
-		if (allData[code]) return;
 
-		// perform ajax call
-		$.ajax({
-			dataType: "json",
-			url: "./data/" + code + ".json",
-			async: true,
-			success: function(data) {
-				allData[code] = data;
-			}
+	$('#filter-select').on('change', function(e) {
+		s = $(this).val();
+		filter = {};
+		if (s) $.each(s, function(i, t) {
+			filter[t] = true;
+			loadData(t);
 		});
-	}
+
+		// persists the preference
+		Cookies.set('nf_filter', JSON.stringify(s), {expires: Infinity});
+	});
 
 	$('body').on('change', '.filter-faculty-checkbox', function() {
 		if ($(this).is(':checked')) {
@@ -118,18 +126,21 @@ $(function() {
 				if (match(allData[key][i].combined, splitted)) {
 					if (result.length < maxResult) {
 						result.push(data);
+					} else {
+						return false;
 					}
 				}
 			});
+			if (result.length >= maxResult) return false;
 		});
 
 		searchResultDom = $('#search-result-box');
 		searchResultDom.html('');
 		
 		$.each(result, function(i, data) {
-			var template = '<div class="col-md-12 search-result">' + 
-                                '<a href="javascript:void(0)" class="btn btn-primary btn-raised btn-block">' +
-                                    '<h5>' + data.nim + '</h5>' +
+			var template = '<div class="col-md-3 search-result">' + 
+                                '<a href="javascript:void(0)" class="btn btn-material-green btn-raised btn-block">' +
+                                    '<h5><strong>' + data.nim + '</strong></h5>' +
                                     '<h5>' + data.name + '</h5>' +
                                 '</a>' + 
                             '</div>';

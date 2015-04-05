@@ -30,3 +30,4 @@
 # Temporary crawled files
 crawler/crawled
 crawler/crawled/*
+crawler/all.txt
