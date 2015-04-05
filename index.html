@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <!-- MEMO: update me with `git checkout gh-pages && git merge master && git push origin gh-pages` -->
+    <head>
+        <meta charset="utf-8">
+        <title>Bootstrap Material</title>
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+        <link href="dist/css/roboto.min.css" rel="stylesheet">
+        <link href="dist/css/material-fullpalette.min.css" rel="stylesheet">
+        <link href="dist/css/ripples.min.css" rel="stylesheet">
+        <link href="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .btn {
+                margin-bottom: 4px;
+                white-space: normal;
+            }
+            #search-result-box {
+                -webkit-column-count: 4;
+                -moz-column-count: 4;
+                column-count: 4;
+/*                display: flex;
+                flex-wrap: wrap;
+*/            }
+            .search-result {
+                -webkit-column-break-inside: avoid; /* Chrome, Safari */
+                page-break-inside: avoid;           /* Theoretically FF 20+ */
+                break-inside: avoid-column;         /* IE 11 */
+                display:table;                      /* Actually FF 20+ */                
+            }
+            h1 {
+                margin-bottom: 30px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+
+            <div style="margin-top: 40px">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="well">
+                            <h1>NIM Finder</h1>
+
+                            <div class="form-group has-success">
+                                <input class="form-control floating-label input-lg" id="search-query" type="text" placeholder="Search NIM or Name">
+                            </div>
+                            <h5 id="search-info"></h5>
+                            <div class="row" id="search-result-box">
+                            </div>
+                            <small>Search results are limited to 100 due to performance reason. If the name/nim you are looking for is not here, try a more specific keywords or filter</small>
+
+                            <hr style="margin-top: 40px;">
+                            <footer>
+                                <small>
+                                    &copy; 2015 NIM Finder. The data are obtained from DPK in <a href="https://akademik.itb.ac.id">akademik.itb.ac.id</a>.
+                            </footer>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="well">
+                            <div class="text-center">
+                                <a class="btn btn-flat btn-lg" data-toggle="collapse" href="#filter-faculty-box" aria-expanded="false" aria-controls="filter-faculty-box">
+                                    Filter
+                                </a>
+                            </div>
+                            <div id="filter-faculty-summary"></div>
+                            <div class="collapse in" id="filter-faculty-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <br>
+
+        <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+        <script src="dist/js/ripples.min.js"></script>
+        <script src="dist/js/material.min.js"></script>
+        <script type="text/javascript" src="dist/js/nim-finder.js"></script>
+    </body>
+</html>
