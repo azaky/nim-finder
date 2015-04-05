@@ -56,33 +56,6 @@ $(function() {
 		}
 	});
 
-
-	$('#filter-select').on('change', function(e) {
-		s = $(this).val();
-		filter = {};
-		if (s) $.each(s, function(i, t) {
-			filter[t] = true;
-			loadData(t);
-		});
-
-		// persists the preference
-		Cookies.set('nf_filter', JSON.stringify(s), {expires: Infinity});
-	});
-
-	$('body').on('change', '.filter-faculty-checkbox', function() {
-		if ($(this).is(':checked')) {
-			// add to filter if not exist
-			filter[$(this).data('faculty')] = true;
-
-			// load json
-			loadData($(this).data('faculty'));
-		} else {
-			// remove from filter
-			filter[$(this).data('faculty')] = undefined;
-		}
-		updateFilter();
-	});
-
 	function isQueryEmpty(qa) {
 		for (var i = 0; i < qa.length; i++) {
 			if (qa[i].length) {
@@ -153,4 +126,20 @@ $(function() {
 	$('#search-query').on('keydown keyup', function(e) {
 		search($(this).val());
 	});
+
+	$('#filter-select').on('change', function(e) {
+		s = $(this).val();
+		filter = {};
+		if (s) $.each(s, function(i, t) {
+			filter[t] = true;
+			loadData(t);
+		});
+
+		// persists the preference
+		Cookies.set('nf_filter', JSON.stringify(s), {expires: Infinity});
+
+		// change the search result
+		search($('#search-query').val());
+	});
+
 });
