@@ -22,6 +22,9 @@ $(function() {
 
 	var done = false;
 
+	var RESULTS_PER_PAGE = 20;
+	var STUDENT_OBJECT = Parse.Object.extend("Student");
+
 	$.ajax({
 		dataType: "json",
 		url: "./data/faculties.json",
@@ -56,75 +59,107 @@ $(function() {
 		}
 	});
 
-	function isQueryEmpty(qa) {
-		for (var i = 0; i < qa.length; i++) {
-			if (qa[i].length) {
-				return false;
-			}
-		}
-		return true;
-	}
+	function search(rawQuery, options, callback) {
+		var query = getQuery(rawQuery, options);
+		console.log("query: " + JSON.stringify(query));
+		var promiseFind = query.find();
+		var promiseCount = query.count();
 
-	function match(slo, qa) {
-		var count = 0;
-		for (var i = 0; i < qa.length; i++) {
-			if (qa[i].length) {
-				if (slo.indexOf(qa[i]) >= 0) {
-					count++;
-				}
-			} else {
-				count++;
-			}
-		}
-		return count == qa.length;
-	}
-
-	function search(q) {
-		// split query
-		splitted = q.toLowerCase().split(" ");
-
-		if (isQueryEmpty(splitted)) {
-			$('#search-info').html('');
-			$('#search-result-box').html('');
-			return;
-		}
-
-		result = [];
-		$.each(filter, function(key, value) {
-			if (value && allData[key])
-			$.each(allData[key], function(i, data) {
-				if (!allData[key][i].combined) {
-					allData[key][i].combined = (data.nim + " " + data.name).toLowerCase();
-				}
-				if (match(allData[key][i].combined, splitted)) {
-					if (result.length < maxResult) {
-						result.push(data);
-					} else {
-						return false;
-					}
-				}
+		var callCallbackSuccess = function(results, count) {
+			callback({
+				query: rawQuery,
+				results: results,
+				count: count
 			});
-			if (result.length >= maxResult) return false;
-		});
+		};
+		var callCallbackFailure = function(error) {
+			callback({
+				query: rawQuery,
+				error: error
+			});
+		};
 
+		Parse.Promise
+				.when(promiseFind, promiseCount)
+				.then(callCallbackSuccess, callCallbackFailure);
+	}
+
+	function getQuery(rawQuery, options) {
+		var splittedQuery = splitQuery(rawQuery.toLowerCase());
+
+		var query = getNimFilterQuery(options.filters);
+		query.containsAll("search_token", splittedQuery);
+
+		query.limit(RESULTS_PER_PAGE);
+		if (options.page !== undefined) {
+			query.skip((options.page - 1) * RESULTS_PER_PAGE);
+		}
+
+		return query;
+	}
+
+	function getNimFilterQuery(filters) {
+		if (filters !== undefined) {
+			var filterQueries = [];
+			$.each(filters, function(i, filter) {
+				var filterQuery = new Parse.Query(STUDENT_OBJECT);
+				filterQuery.startsWith("nim", filter);
+				filterQueries.push(filterQuery);
+			});
+			return Parse.Query.or.apply(null, filterQueries);
+		} else {
+			return new Parse.Query(STUDENT_OBJECT);
+		}
+	}
+
+	function splitQuery(rawQuery) {
+		var result = [];
+		$.each(rawQuery.split(/\s/), function(i, word) {
+			if (word.length >= 3) {
+				result.push(word);
+			}
+		});
+		return result;
+	}
+
+	function regexEscape(regex) {
+		return regex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	}
+
+	function printResultsOnConsole(results) {
+		if (results.results !== undefined) {
+			console.log("Successfully retrieved " + results.results.length + " data");
+			for (var i = 0; i < results.results.length; i++) {
+				var object = results.results[i];
+				console.log(object.get('nim') + ' - ' + object.get('name'));
+			}
+		} else if (results.error !== undefined) {
+			console.log("Error: " + results.error.code + " " + results.error.message);
+		}
+	}
+
+	function showResult(results) {
 		searchResultDom = $('#search-result-box');
 		searchResultDom.html('');
-		
-		$.each(result, function(i, data) {
-			var template = '<div class="col-md-3 search-result">' + 
-                                '<a href="javascript:void(0)" class="btn btn-material-green btn-raised btn-block">' +
-                                    '<h5><strong>' + data.nim + '</strong></h5>' +
-                                    '<h5>' + data.name + '</h5>' +
-                                '</a>' + 
-                            '</div>';
-            searchResultDom.append(template);
-		});
 
-		$('#search-info').html('Showing ' + result.length + ' results for <strong>' + q + '</strong>');
+		if (results.results !== undefined) {
+			$.each(results.results, function(i, data) {
+				var template = '<div class="col-md-3 search-result">' + 
+		                            '<a href="javascript:void(0)" class="btn btn-material-green btn-raised btn-block">' +
+		                                '<h5><strong>' + data.get("nim") + '</strong></h5>' +
+		                                '<h5>' + data.get("name") + '</h5>' +
+		                            '</a>' + 
+		                        '</div>';
+		        searchResultDom.append(template);
+			});
+			$('#search-info').html('Showing ' + results.results.length + ' of ' + results.count + ' results for <strong>' + results.query + '</strong>');
+		} else if (results.error !== undefined) {
+			$('#search-info').html('Error : ' + JSON.stringify(results.error));
+		}
 	}
 
-	$('#search-query').on('keydown keyup', function(e) {
-		search($(this).val());
+	$('#search-query').on('change', function(e) {
+		search($(this).val(), {page: 2}, showResult);
 	});
 
 	$('#filter-select').on('change', function(e) {
