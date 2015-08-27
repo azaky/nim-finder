@@ -1,3 +1,79 @@
+var Search = function() {
+
+	var STUDENT_OBJECT = Parse.Object.extend("Student");
+	var RESULTS_PER_PAGE = 20;
+	var MIN_SEARCH_TOKEN_LENGTH = 1;
+
+	this.search = function(rawQuery, options, callback) {
+		var query = getQuery(rawQuery, options);
+		var promiseFind = query.find();
+		var promiseCount = query.count();
+
+		var callCallbackSuccess = function(results, count) {
+			callback({
+				query: rawQuery,
+				results: results,
+				count: count
+			});
+		};
+		var callCallbackFailure = function(errors) {
+			callback({
+				query: rawQuery,
+				errors: errors
+			});
+		};
+
+		Parse.Promise
+				.when(promiseFind, promiseCount)
+				.then(callCallbackSuccess, callCallbackFailure);
+	};
+
+	var getQuery = (function(rawQuery, options) {
+		var searchTokens = splitQuery(rawQuery.toLowerCase());
+
+		return getNimFilterQuery(options.filters)
+				.containsAll("search_token", searchTokens)
+				.limit(RESULTS_PER_PAGE)
+				.skip(getNumSkipped(options.page));
+	});
+
+	var getNimFilterQuery = (function(filters) {
+		if (filters !== undefined) {
+			var filterQueries = [];
+			$.each(filters, function(i, filter) {
+				var filterQuery = new Parse.Query(STUDENT_OBJECT);
+				filterQuery.startsWith("nim", filter);
+				filterQueries.push(filterQuery);
+			});
+			return Parse.Query.or.apply(null, filterQueries);
+		} else {
+			return new Parse.Query(STUDENT_OBJECT);
+		}
+	});
+
+	var getNumSkipped = (function(page) {
+		if (!page) {
+			return 0;
+		} else {
+			return (page - 1) * RESULTS_PER_PAGE;
+		}
+	});
+
+	var splitQuery = (function(rawQuery) {
+		var result = [];
+		$.each(rawQuery.split(/\s/), function(i, word) {
+			if (word.length >= MIN_SEARCH_TOKEN_LENGTH) {
+				result.push(word);
+			}
+		});
+		return result;
+	});
+
+	var regexEscape = (function(regex) {
+		return regex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	});
+};
+
 var filter = {};
 var allData = {};
 var maxResult = 100;
@@ -22,8 +98,7 @@ $(function() {
 
 	var done = false;
 
-	var RESULTS_PER_PAGE = 20;
-	var STUDENT_OBJECT = Parse.Object.extend("Student");
+	var searchObject = new Search();
 
 	$.ajax({
 		dataType: "json",
@@ -59,73 +134,6 @@ $(function() {
 		}
 	});
 
-	function search(rawQuery, options, callback) {
-		var query = getQuery(rawQuery, options);
-		console.log("query: " + JSON.stringify(query));
-		var promiseFind = query.find();
-		var promiseCount = query.count();
-
-		var callCallbackSuccess = function(results, count) {
-			callback({
-				query: rawQuery,
-				results: results,
-				count: count
-			});
-		};
-		var callCallbackFailure = function(error) {
-			callback({
-				query: rawQuery,
-				error: error
-			});
-		};
-
-		Parse.Promise
-				.when(promiseFind, promiseCount)
-				.then(callCallbackSuccess, callCallbackFailure);
-	}
-
-	function getQuery(rawQuery, options) {
-		var splittedQuery = splitQuery(rawQuery.toLowerCase());
-
-		var query = getNimFilterQuery(options.filters);
-		query.containsAll("search_token", splittedQuery);
-
-		query.limit(RESULTS_PER_PAGE);
-		if (options.page !== undefined) {
-			query.skip((options.page - 1) * RESULTS_PER_PAGE);
-		}
-
-		return query;
-	}
-
-	function getNimFilterQuery(filters) {
-		if (filters !== undefined) {
-			var filterQueries = [];
-			$.each(filters, function(i, filter) {
-				var filterQuery = new Parse.Query(STUDENT_OBJECT);
-				filterQuery.startsWith("nim", filter);
-				filterQueries.push(filterQuery);
-			});
-			return Parse.Query.or.apply(null, filterQueries);
-		} else {
-			return new Parse.Query(STUDENT_OBJECT);
-		}
-	}
-
-	function splitQuery(rawQuery) {
-		var result = [];
-		$.each(rawQuery.split(/\s/), function(i, word) {
-			if (word.length >= 3) {
-				result.push(word);
-			}
-		});
-		return result;
-	}
-
-	function regexEscape(regex) {
-		return regex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-	}
-
 	function printResultsOnConsole(results) {
 		if (results.results !== undefined) {
 			console.log("Successfully retrieved " + results.results.length + " data");
@@ -159,7 +167,7 @@ $(function() {
 	}
 
 	$('#search-query').on('change', function(e) {
-		search($(this).val(), {page: 2}, showResult);
+		searchObject.search($(this).val(), {}, showResult);
 	});
 
 	$('#filter-select').on('change', function(e) {
