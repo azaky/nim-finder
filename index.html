@@ -1,98 +1,112 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>NIM Finder</title>
-        <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
-        <link href="dist/css/roboto.min.css" rel="stylesheet">
-        <link href="dist/css/material.min.css" rel="stylesheet">
-        <!-- <link href="dist/css/ripples.min.css" rel="stylesheet"> -->
-        <!-- <link href="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.css" rel="stylesheet"> -->
-        <link href="dist/css/chosen.min.css" rel="stylesheet">
-        <style>
-            .btn {
-                margin-bottom: 4px;
-                white-space: normal;
-            }
-            #search-result-box {
-                display: flex;
-                flex-wrap: wrap;
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>NIM Finder</title>
+		<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+		<link href="dist/css/roboto.min.css" rel="stylesheet">
+		<link href="dist/css/material.min.css" rel="stylesheet">
+		<!-- <link href="dist/css/ripples.min.css" rel="stylesheet"> -->
+		<link href="dist/css/chosen.min.css" rel="stylesheet">
+		<style>
+			.btn {
+				margin-bottom: 4px;
+				white-space: normal;
+			}
+			#search-result-box {
+				display: flex;
+				flex-wrap: wrap;
 /*                -webkit-column-count: 4;
-                -moz-column-count: 4;
-                column-count: 4;
-                columns: 4;
+				-moz-column-count: 4;
+				column-count: 4;
+				columns: 4;
 */            }
-            .search-result {
-                padding: 10px;
-                -webkit-column-break-inside: avoid; /* Chrome, Safari */
-                page-break-inside: avoid;           /* Theoretically FF 20+ */
-                break-inside: avoid-column;         /* IE 11 */
-                display:table;                      /* Actually FF 20+ */                
-            }
-            .search-result a {
-                display: flex;
-                flex-wrap: wrap;
-                height: 130px;
-                line-height: 130px;
-                justify-content: center; /* align horizontal */
-                align-items: center; /* align vertical */
-            }
+			.search-result {
+				padding: 10px;
+				-webkit-column-break-inside: avoid; /* Chrome, Safari */
+				page-break-inside: avoid;           /* Theoretically FF 20+ */
+				break-inside: avoid-column;         /* IE 11 */
+				display:table;                      /* Actually FF 20+ */                
+			}
+			.search-result a {
+				display: flex;
+				flex-wrap: wrap;
+				height: 130px;
+				line-height: 130px;
+				justify-content: center; /* align horizontal */
+				align-items: center; /* align vertical */
+			}
+			.center {
+				text-align: center;
+				float: none;
+				margin-left: auto;
+				margin-right: auto;
+			}
 
-        </style>
-    </head>
-    <body>
-        <div class="container">
+		</style>
+	</head>
+	<body>
+		<div class="container">
 
-            <div style="margin-top: 40px">
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="well">
-                            <h1 style="margin-bottom: 30px">NIM Finder</h1>
+			<div style="margin-top: 40px">
+				<div class="row">
+					<div class="col-md-8 col-md-offset-2">
+						<div class="well">
+							<h1 style="margin-bottom: 30px">NIM Finder</h1>
 
-                            <div class="form-group has-success">
-                                <input class="form-control floating-label input-lg" id="search-query" type="text" placeholder="Search NIM or Name">
-                            </div>
-                            <small>
-                                <a href="#">Filters ...</a>
-                            </small>
-                            <h5 id="search-info"></h5>
-                            <div class="row" id="search-result-box">
-                            </div>
+							<div class="form-group has-success">
+								<input class="form-control floating-label input-lg" id="search-query" type="text" placeholder="Search NIM or Name">
+							</div>
 
-                            <hr style="margin-top: 40px;">
-                            <footer>
-                                <small>
-                                    &copy; 2015 NIM Finder. The data are obtained from DPK in <a href="https://akademik.itb.ac.id">akademik.itb.ac.id</a>.
-                            </footer>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-9">
-                    </div>
-                </div>
-            </div>
+							<a id="toggle-filters" data-status="hidden" href="#">Show Filters ...</a>
+							<div class="collapse" id="filters">
+								<span class="text-primary">Limit the search only to some study programs</span>
+								<div class="form-group has-success">
+									<select class="form-control" id="filter-select" data-placeholder=" " multiple>
+									</select>
+								</div>
+							</div>
+							<h5 id="search-info"></h5>
+							<div class="row" id="search-result-box"></div>
+							<div class="center" id="pagination">
+							</div>
 
-        </div>
-        <br>
+							<hr style="margin-top: 40px;">
+							<footer>
+								<small>
+									&copy; 2015 NIM Finder. The data are obtained from DPK in <a href="https://akademik.itb.ac.id">akademik.itb.ac.id</a>.
+								</small>
+							</footer>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-9">
+					</div>
+				</div>
+			</div>
 
-        <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-        <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
-        <script type="text/javascript">
-            Parse.initialize("6GR14ZdXnygzDxrcuwcULVp5k4ROUtRnnDgUqYD6", "7BiQmwbNXm1qZ6n5Mn69TCW03jfVAGEBy1cuX4M0");
-        </script>
-        <script type="text/javascript" src="http//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-        <script src="dist/js/ripples.min.js"></script>
-        <script src="dist/js/material.min.js"></script>
-        <script type="text/javascript">
-            $.material.init();
-        </script>
-        <script src="dist/js/chosen.jquery.min.js"></script>
-        <script src="dist/js/chosen.proto.min.js"></script>
-        <script src="dist/js/cookies.min.js"></script>
-        <script type="text/javascript" src="dist/js/nim-finder.js"></script>
-        <script>
+		</div>
+		<br>
+
+		<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
+		<script type="text/javascript">
+			Parse.initialize("6GR14ZdXnygzDxrcuwcULVp5k4ROUtRnnDgUqYD6", "7BiQmwbNXm1qZ6n5Mn69TCW03jfVAGEBy1cuX4M0");
+		</script>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		<script src="dist/js/ripples.min.js"></script>
+		<script src="dist/js/material.min.js"></script>
+		<script type="text/javascript">
+			$($.material.init());
+		</script>
+		<script src="dist/js/chosen.jquery.min.js"></script>
+		<script src="dist/js/chosen.proto.min.js"></script>
+		<script src="dist/js/cookies.min.js"></script>
+		<script src="dist/js/jquery.twbsPagination.min.js"></script>
+		<script type="text/javascript" src="dist/js/nim-finder.js"></script>
+		<script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -100,6 +114,6 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-61579763-1', 'auto');
 ga('send', 'pageview');
-    </script>
-    </body>
+	</script>
+	</body>
 </html>
