@@ -4,9 +4,16 @@ var Search = function() {
 	var RESULTS_PER_PAGE = 20;
 	var MIN_SEARCH_TOKEN_LENGTH = 1;
 
+	var lastQuery = null;
+	var that = this;
+
 	this.search = function(query, callback) {
+		lastQuery = query;
 		console.log(JSON.stringify(query));
 		var parseQuery = getQuery(query);
+		for (var i = 0; i < 100; ++i) {
+			parseQuery.find();
+		}
 		var promiseFind = parseQuery.find();
 		var promiseCount = parseQuery.count();
 
@@ -79,6 +86,10 @@ var Search = function() {
 		});
 		return result;
 	});
+
+	this.redoSearch = function(callback) {
+		that.search(lastQuery, callback);
+	};
 };
 
 // Only for study program codes filter. Probably will add more filters in the
@@ -86,12 +97,13 @@ var Search = function() {
 var Filter = function() {
 	var COOKIE_KEY = "nf_filter";
 	var filters = {};
+	var enabled = false;
 	var that = this;
 
 	var loadFromCookies = (function() {
 		var cookie = JSON.parse(Cookies(COOKIE_KEY));
 		if (cookie) {
-			$.each(cookie, function(i, code) {
+			$.each(cookie, function(code, i) {
 				filters[code] = true;
 			});
 		}
@@ -102,11 +114,25 @@ var Filter = function() {
 		Cookies.set(COOKIE_KEY, JSON.stringify(filters), {expires: Infinity});
 	});
 
+	this.isEnabled = function() {
+		return enabled;
+	};
+
+	this.enable = function() {
+		enabled = true;
+	};
+
+	this.disable = function() {
+		enabled = false;
+	};
+
 	this.getAll = function() {
 		var filtersArray = [];
-		$.each(filters, function(code, unused) {
-			filtersArray.push(code);
-		});
+		if (enabled) {
+			$.each(filters, function(code) {
+				filtersArray.push(code);
+			});
+		}
 		return filtersArray;
 	};
 
@@ -134,20 +160,17 @@ var Filter = function() {
 	}
 
 	this.each = function(callback) {
-		$.each(filters, function(i, code) {
+		$.each(filters, function(code) {
 			callback(code);
 		});
 	};
 };
 
-var filter = {};
-var maxResult = 100;
-
 $(function() {
-	// List of supported faculties
 	var faculties;
 
 	var searchObject = new Search();
+	var lastQuery = null;
 	var filters = new Filter();
 	var chosen = null;
 
@@ -173,8 +196,8 @@ $(function() {
 		}
 	});
 
-	function printResultsOnConsole(results) {
-		if (results.results !== undefined) {
+	function printResultsOnConsole(result) {
+		if (result.results !== undefined) {
 			console.log("Successfully retrieved " + results.results.length + " data");
 			for (var i = 0; i < results.results.length; i++) {
 				var object = results.results[i];
@@ -186,6 +209,7 @@ $(function() {
 	}
 
 	function setupPagination(page, numPages, onPageClick) {
+		// The pagination does not support reinitialization.
 		$('#pagination').html('<ul></ul>');
 		if (numPages > 0) {
 			$('#pagination ul').twbsPagination({
@@ -219,7 +243,7 @@ $(function() {
 				searchResultDom.append(template);
 			});
 			if (results.count > 0) {
-				searchInfoDom.html('Showing result ' + results.start + ' to ' + results.end + ' of ' + results.count + ' for <strong>' + result.query.query + '</strong>');
+				searchInfoDom.html('Showing result ' + results.start + ' to ' + results.end + ' of ' + results.count + ' for <strong>' + result.query.query + '</strong>.');
 			} else {
 				searchInfoDom.html('No result found for <strong>' + result.query.query + '</strong>');
 			}
@@ -229,7 +253,8 @@ $(function() {
 				searchObject.search(query, showResult);
 			});
 		} else if (result.error !== undefined) {
-			$('#search-info').html('Error : ' + JSON.stringify(result.error));
+			var error = result.error instanceof Array ? result.error[0] : result.error;
+			searchInfoDom.html('Error : ' + error.message + '. <a id="retry" href="#">Retry</a>');
 		}
 	}
 
@@ -248,7 +273,7 @@ $(function() {
 			filters.add(code);
 		});
 
-		// change the search result
+		// Redo search
 		searchObject.search({
 			query: $("#search-query").val(),
 			page: 1,
@@ -256,21 +281,34 @@ $(function() {
 		}, showResult);
 	});
 
-	$('#toggle-filters').on('click', function(e) {
+	$('body').on('click', '#toggle-filters a', function(e) {
 		$('#filters').collapse('toggle');
-		if ($(this).data('status') === "hidden") {
-			// introducing chosen.js
+		var toggle = $('#toggle-filters');
+		if (toggle.data('status') === "hidden") {
+			// Lazily enabling chosen.js
 			if (chosen === null) {
 				chosen = $('#filter-select').chosen({
 					placeholder_text_multiple: " ",
 					search_contains: true
 				});
 			}
-			$(this).data('status', 'shown');
-			$(this).text('Hide Filters ...');
+			toggle.data('status', 'shown');
+			toggle.html('Limit the search only to some study programs. <a href="#">Disable filters ...</a>');
+			filters.enable();
 		} else {
-			$(this).data('status', 'hidden');
-			$(this).text('Show Filters ...');
+			toggle.data('status', 'hidden');
+			toggle.html('<a href="#">Use filters ...</a>');
+			filters.disable();
 		}
+		// Redo search
+		searchObject.search({
+			query: $("#search-query").val(),
+			page: 1,
+			filters: filters.getAll()
+		}, showResult);
 	});
+
+	$('body').on('click', '#retry', function(e) {
+		searchObject.redoSearch(showResult);
+	})
 });
