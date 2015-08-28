@@ -11,9 +11,6 @@ var Search = function() {
 		lastQuery = query;
 		console.log(JSON.stringify(query));
 		var parseQuery = getQuery(query);
-		for (var i = 0; i < 100; ++i) {
-			parseQuery.find();
-		}
 		var promiseFind = parseQuery.find();
 		var promiseCount = parseQuery.count();
 
