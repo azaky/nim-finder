@@ -98,7 +98,7 @@ var Filter = function() {
 	var that = this;
 
 	var loadFromCookies = (function() {
-		var cookie = JSON.parse(Cookies(COOKIE_KEY));
+		var cookie = JSON.parse(Cookies(COOKIE_KEY) | {});
 		if (cookie) {
 			$.each(cookie, function(code, i) {
 				filters[code] = true;
