@@ -24,6 +24,7 @@ $(function initializeFacultiesFilter() {
 $(function () {
 	var lastQuery = null;
 	var filters = [];
+	var isFilterEnabled = false;
 	var chosen = null;
 
 	function doSearch(query) {
@@ -43,10 +44,6 @@ $(function () {
 		// TODO: Add smooth fade out/scroll
 		$('#search-info').hide();
 		$('#search-result-box').hide();
-	}
-
-	function isFilterEnabled() {
-		return $('#toggle-filters').data('status') === 'shown';
 	}
 
 	function showResult(result) {
@@ -101,6 +98,7 @@ $(function () {
 
 	function showError(error) {
 		$('#search-loading-bar').hide();
+		$('#pagination').html('<ul></ul>');
 		showErrorMessage(error.message);
 	}
 
@@ -132,7 +130,7 @@ $(function () {
 		redoSearchAfterFilterChanged();
 	});
 
-	$('body').on('click', '#toggle-filters a', function(e) {
+	$('#toggle-filters a').on('click', function(e) {
 		$('#filters').collapse('toggle');
 		var toggle = $('#toggle-filters');
 		if (toggle.data('status') === "hidden") {
@@ -140,10 +138,12 @@ $(function () {
 			$('#toggle-filters-show').hide();
 			$('#toggle-filters-hide').show();
 			toggle.data('status', 'shown');
+			isFilterEnabled = true;
 		} else {
 			$('#toggle-filters-show').show();
-			$('#toggle-filters-hide').show();
+			$('#toggle-filters-hide').hide();
 			toggle.data('status', 'hidden');
+			isFilterEnabled = false;
 		}
 		redoSearchAfterFilterChanged();
 	});

@@ -1,0 +1,39 @@
+.btn {
+	margin-bottom: 4px;
+	white-space: normal;
+}
+#search-result-box {
+	display: flex;
+	flex-wrap: wrap;
+/*                -webkit-column-count: 4;
+	-moz-column-count: 4;
+	column-count: 4;
+	columns: 4;
+*/            }
+.search-result {
+	width: 100%;
+	padding: 10px;
+	padding-right: 50px;
+	-webkit-column-break-inside: avoid; /* Chrome, Safari */
+	page-break-inside: avoid;           /* Theoretically FF 20+ */
+	break-inside: avoid-column;         /* IE 11 */
+	display:table;                      /* Actually FF 20+ */
+}
+
+.search-result a {
+	display: flex;
+	flex-wrap: wrap;
+	margin-left: 20px;
+	margin-right: 20px;
+	font-size: 28px;
+	height: 70px;
+	line-height: 70px;
+	/*justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+}
+.center {
+	text-align: center;
+	float: none;
+	margin-left: auto;
+	margin-right: auto;
+}
