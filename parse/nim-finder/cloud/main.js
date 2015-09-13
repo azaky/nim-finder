@@ -26,15 +26,15 @@ var _ = require("underscore");
 		}
 	});
 
-	var getBatch = (function(nim) {
+	function getBatch(nim) {
 		if (nim.length < 8) {
 			return 0;
 		} else {
 			return 2000 + parseInt(nim.substr(3, 2));
 		}
-	});
+	}
 
-	var getSearchToken = (function(data) {
+	function getSearchToken(data) {
 		var tokens = [];
 		var memo = {};
 
@@ -43,9 +43,9 @@ var _ = require("underscore");
 		});
 
 		return tokens;
-	});
+	}
 
-	var addAllSubstrings = (function(string, tokens, memo) {
+	function addAllSubstrings(string, tokens, memo) {
 		var lowercase = string.toLowerCase();
 		for (var i = 0; i < lowercase.length; ++i) {
 			for (var j = i + 1; j <= lowercase.length; ++j) {
@@ -56,7 +56,7 @@ var _ = require("underscore");
 				}
 			}
 		}
-	});
+	}
 })();
 
 
@@ -79,10 +79,10 @@ var _ = require("underscore");
 // 		numPages: 20
 // 	}
 // }
-(function() {
+(function() {javascript:void(0)
 
 	var STUDENT_OBJECT = Parse.Object.extend("Student");
-	var RESULTS_PER_PAGE = 20;
+	var RESULTS_PER_PAGE = 10;
 	var MIN_SEARCH_TOKEN_LENGTH = 1;
 
 	Parse.Cloud.define("search", function(request, response) {
@@ -121,20 +121,20 @@ var _ = require("underscore");
 			},
 			function(errors) {
 				var error = _.isArray(errors) ? errors[0] : errors;
-				response.error("Could not perform search, error " + error.code + ": " + error.message);
+				response.error(error.message + " (" + error.code + ") ");
 			});
 	});
 
-	var getParseQuery = (function(query) {
+	function getParseQuery(query) {
 		var searchTokens = splitQuery(query.query.toLowerCase());
 
 		return getNimFilterQuery(query.filters)
 				.containsAll("search_token", searchTokens)
 				.limit(RESULTS_PER_PAGE)
 				.skip(getNumSkipped(query.page));
-	});
+	}
 
-	var getNimFilterQuery = (function(filters) {
+	function getNimFilterQuery(filters) {
 		if (filters instanceof Array && filters.length > 0) {
 			var filterQueries = [];
 			_.each(filters, function(filter) {
@@ -146,21 +146,21 @@ var _ = require("underscore");
 		} else {
 			return new Parse.Query(STUDENT_OBJECT);
 		}
-	});
+	}
 
-	var getNumSkipped = (function(page) {
+	function getNumSkipped(page) {
 		if (!page) {
 			return 0;
 		} else {
 			return (page - 1) * RESULTS_PER_PAGE;
 		}
-	});
+	}
 
-	var getNumPages = (function(count) {
+	function getNumPages(count) {
 		return Math.ceil(count / RESULTS_PER_PAGE);
-	});
+	}
 
-	var splitQuery = (function(rawQuery) {
+	function splitQuery(rawQuery) {
 		var result = [];
 		_.each(rawQuery.split(/\s/), function(word) {
 			if (word.length >= MIN_SEARCH_TOKEN_LENGTH) {
@@ -168,6 +168,6 @@ var _ = require("underscore");
 			}
 		});
 		return result;
-	});
+	}
 
 })();
