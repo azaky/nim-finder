@@ -1,5 +1,7 @@
 package io.github.azaky.nimfinder.data.processor;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import io.github.azaky.nimfinder.data.Faculty;
 import io.github.azaky.nimfinder.data.Student;
 
@@ -14,17 +16,30 @@ import java.util.logging.Logger;
 public class Main {
 
     public static final Logger LOG = Logger.getLogger("log");
-    public static final String ROOT_DIR = "../nim-finder-crawler/crawled";
+    public static final String ROOT_DIR = "../crawler/crawled";
     public static final String OUTPUT_FILENAME = "build/all-nim.csv";
 
     public static void main(String[] args) {
         Collection<Student> rawStudents = importRawStudentData();
-        StudentDataMerger merger = new StudentDataMerger(rawStudents);
+        Collection<Student> rawStudents2010OrLater = FluentIterable.from(rawStudents).filter(IS_2010_OR_LATER).toSet();
+        StudentDataMerger merger = new StudentDataMerger(rawStudents2010OrLater);
         Collection<Student> merged = merger.merge();
         ProcessResult result = merger.getProcessResult();
         logResult(result);
         exportStudentDataToCsv(merged);
     }
+
+    private static final Predicate<? super Student> IS_2010_OR_LATER = new Predicate<Student>() {
+        @Override
+        public boolean apply(Student input) {
+            int batch = input.getBatch();
+            if (batch >= 2000) {
+                return batch >= 2010;
+            } else {
+                return batch >= 10;
+            }
+        }
+    };
 
     private static void logResult(ProcessResult result) {
         if (!result.getFailures().isEmpty()) {
