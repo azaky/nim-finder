@@ -110,6 +110,7 @@ $(function () {
 	}
 
 	$('#search-query').on('change', function(e) {
+		$(this).blur();
 		doSearchFromInput();
 	});
 
