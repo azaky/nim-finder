@@ -9,4 +9,4 @@ The project structure is as follows.
 - `crawler`, contains PHP script used to crawl data. Crawler is provided by [PHPCrawl](http://phpcrawl.cuab.de/).
 - `data-processor`, converts raw crawled data to a nicer format (e.g. CSV).
 - `parse`, contains the cloud code in the backend.
-- `web`, the web application itself.
+- `dist`, the assets needed by the web page.
