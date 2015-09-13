@@ -1,0 +1,31 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+version = '0.1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'NIM Finder Data Processor',
+                   'Implementation-Version': '0.1.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.guava:guava:18.0'
+    compile 'com.google.code.findbugs:findbugs:3.0.1'
+    compile 'com.opencsv:opencsv:3.5'
+    compile 'org.json:json:20141113'
+    testCompile 'junit:junit:4.12'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}

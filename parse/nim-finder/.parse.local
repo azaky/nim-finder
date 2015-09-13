@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "_default": {
+      "link": "nim-finder"
+    },
+    "nim-finder": {
+      "applicationId": "6GR14ZdXnygzDxrcuwcULVp5k4ROUtRnnDgUqYD6"
+    }
+  }
+}

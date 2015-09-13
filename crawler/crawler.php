@@ -3,7 +3,7 @@
 // It may take a whils to crawl a site ...
 set_time_limit(10000);
 
-// Inculde the phpcrawl-mainclass
+// Include the phpcrawl-mainclass
 include("libs/PHPCrawler.class.php");
 
 // For linebreaks
@@ -13,6 +13,7 @@ else $lb = "<br />";
 // Extend the class and override the handleDocumentInfo()-method
 class MyCrawler extends PHPCrawler
 {
+    public $directoryName;
     public $file_count = 0;
     public $code;
 
@@ -47,7 +48,7 @@ class MyCrawler extends PHPCrawler
                     $this->file_count++;
                     $p = $this->file_count . ".txt";
                     echo "Saving as " . $p . $lb;
-                    file_put_contents('crawled/' . $this->code . '/' . $p, $DocInfo->content);
+                    file_put_contents($this->directoryName . '/' . $p, $DocInfo->content);
                 }
             }
         } else {
@@ -74,13 +75,13 @@ $codes = [
     // FITB
     "120", "128", "129", "151", "163",
     // FTI
-    "130", "133", "134", "144", "167",
+    "130", "133", "134", "144", "167", "195",
     // STEI
     "132", "135", "165", "180", "181", "182", "183",
     // FTMD
     "131", "136", "137", "169",
     // FTSL
-    "150", "153", "155", "157", "158", "166",
+    "150", "153", "155", "157", "158", "166", "196",
     // SAPPK
     "152", "154", "199",
     // FSRD
@@ -89,43 +90,52 @@ $codes = [
     "190", "192", "197"
 ];
 
-foreach ($codes as $code) {
-    // Now, create a instance of your class, define the behaviour
-    // of the crawler (see class-reference for more options and details)
-    // and start the crawling-process.
-    $crawler = new MyCrawler();
-    $crawler->code = $code;
-    $crawler->file_count = 0;
+for ($year = 2010; $year <= 2015; ++$year) {
+    for ($semester = 1; $semester <= 2; ++$semester) {
+        if ($year === 2015 && $semester === 2) {
+            break;
+        }
+        foreach ($codes as $code) {
+            // Create new directory special for this faculty
+            $directoryName = 'crawled/' . $year . '-' . $semester . '/' . $code;
+            if (!file_exists($directoryName)) {
+                mkdir($directoryName, 0755, true);
+            }
 
-    // Create new directory special for this faculty
-    if (!file_exists('crawled/' . $code)) {
-        mkdir('crawled/' . $code, 0755, true);
+            $crawler = new MyCrawler();
+            $crawler->code = $code;
+            $crawler->file_count = 0;
+            $crawler->directoryName = $directoryName;
+
+            // URL to crawl
+            $curriculum_year = ($year < 2013) ? 2008 : 2013;
+            $url = "https://six.akademik.itb.ac.id/publik/daftarkelas.php?ps=" . $code . "&semester=" . $semester . "&tahun="
+                . $year . "&th_kur=" . $curriculum_year;
+            $crawler->setURL($url);
+
+            // Only receive content of files with content-type "text/html"
+            $crawler->addContentTypeReceiveRule("#text/html#");
+
+            // Ignore links to pictures, dont even request pictures
+            $crawler->addURLFilterRule("#\.(jpg|jpeg|gif|png)$# i");
+
+            // Don't let it back to the main page
+            $res = $crawler->addURLFilterRule("#displayprodikelas.php# i");
+
+            // Thats enough, now here we go
+            echo "Start crawling for year " . $year . " semester " . $semester;
+            $crawler->go();
+
+            // At the end, after the process is finished, we print a short
+            // report (see method getProcessReport() for more information)
+            $report = $crawler->getProcessReport();
+
+            echo "Summary for " . $code . ":" . $lb;
+            echo "Links followed: " . $report->links_followed . $lb;
+            echo "Documents received: " . $report->files_received . $lb;
+            echo "Bytes received: " . $report->bytes_received . " bytes" . $lb;
+            echo "Process runtime: " . $report->process_runtime . " sec" . $lb;
+        }
     }
-
-    // URL to crawl
-    $url = "https://six.akademik.itb.ac.id/publik/daftarkelas.php?ps=". $code ."&semester=2&tahun=2014&th_kur=2013";
-    $crawler->setURL($url);
-
-    // Only receive content of files with content-type "text/html"
-    $crawler->addContentTypeReceiveRule("#text/html#");
-
-    // Ignore links to pictures, dont even request pictures
-    $crawler->addURLFilterRule("#\.(jpg|jpeg|gif|png)$# i");
-
-    // Don't let it back to the main page
-    $res = $crawler->addURLFilterRule("#displayprodikelas.php# i");
-
-    // Thats enough, now here we go
-    $crawler->go();
-
-    // At the end, after the process is finished, we print a short
-    // report (see method getProcessReport() for more information)
-    $report = $crawler->getProcessReport();
-
-    echo "Summary for " . $code . ":" . $lb;
-    echo "Links followed: " . $report->links_followed . $lb;
-    echo "Documents received: " . $report->files_received . $lb;
-    echo "Bytes received: " . $report->bytes_received . " bytes" . $lb;
-    echo "Process runtime: " . $report->process_runtime . " sec" . $lb;
 }
 ?>
