@@ -56,7 +56,7 @@ $(function () {
 		$.each(results.data, function(i, data) {
 			var itemDom = '<div class="search-result">' + 
 								'<a href="javascript:void(0)" class="btn btn-material-green btn-raised btn-block">' +
-									'<h5><strong>' + data.nim + '</strong> | ' + data.name + '</h5>' +
+									'<h5><strong>' + data.nim + '</strong> - ' + data.name + '</h5>' +
 								'</a>' + 
 							'</div>';
 			searchResultDom.append(itemDom);
@@ -110,11 +110,18 @@ $(function () {
 	}
 
 	$('#search-query').on('change', function(e) {
-		doSearch({
-			query: $(this).val(),
-			page: 1
-		}, showResult);
+		doSearchFromInput();
 	});
+
+	function doSearchFromInput() {
+		var query = $('#search-query').val();
+		if (query.length > 0) {
+			doSearch({
+				query: query,
+				page: 1
+			});
+		}
+	}
 
 	$('#retry-search-button').on('click', function(e) {
 		doSearch(lastQuery);
@@ -127,7 +134,7 @@ $(function () {
 			filters.push(code);
 		});
 
-		redoSearchAfterFilterChanged();
+		doSearchFromInput();
 	});
 
 	$('#toggle-filters a').on('click', function(e) {
@@ -145,7 +152,7 @@ $(function () {
 			toggle.data('status', 'hidden');
 			isFilterEnabled = false;
 		}
-		redoSearchAfterFilterChanged();
+		doSearchFromInput();
 	});
 
 	function lazilyEnableChosen() {
@@ -153,16 +160,6 @@ $(function () {
 			chosen = $('#filter-select').chosen({
 				placeholder_text_multiple: " ",
 				search_contains: true
-			});
-		}
-	}
-
-	function redoSearchAfterFilterChanged() {
-		var query = $('#search-query').val();
-		if (query.length > 0) {
-			doSearch({
-				query: query,
-				page: 1
 			});
 		}
 	}
