@@ -3,6 +3,7 @@ package io.github.azaky.nimfinder.data.processor;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.opencsv.CSVWriter;
 import io.github.azaky.nimfinder.data.Nim;
 import io.github.azaky.nimfinder.data.Student;
@@ -14,11 +15,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class StudentDataExporterToCsv implements StudentDataExporter {
 
-    private static final char SEPARATOR = ';';
-    private static final String[] HEADER = {"name", "batch", "nim"};
+    private static final char SEPARATOR = ',';
+    private static final String[] HEADER = {"name", "batch", "nim", "search_token"};
 
     private final File output;
 
@@ -66,7 +68,22 @@ public class StudentDataExporterToCsv implements StudentDataExporter {
                 nim = student.getTpbNim();
             }
             row[2] = Objects.toString(nim, "");
+            row[3] = Objects.toString(getSearchToken(row[0] + " " + row[1]));
             return row;
+        }
+
+        private List<String> getSearchToken(String data) {
+            String[] splitted = data.toLowerCase().split(" ");
+            Set<String> tokens = Sets.newHashSet();
+            for (String word : splitted) {
+                int length = word.length();
+                for (int i = 0; i < length; ++i) {
+                    for (int j = i + 1; j <= length; ++j) {
+                        tokens.add(word.substring(i, j));
+                    }
+                }
+            }
+            return FluentIterable.from(tokens).toList();
         }
     };
 }

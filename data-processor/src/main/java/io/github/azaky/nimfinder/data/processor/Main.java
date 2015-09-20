@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 public class Main {
 
     public static final Logger LOG = Logger.getLogger("log");
-    public static final String ROOT_DIR = "../crawler/crawled";
-    public static final String OUTPUT_FILENAME = "build/all-nim.csv";
+    public static final String ROOT_DIR = "../crawler/crawled/2015-1";
+    public static final String OUTPUT_FILENAME = "build/all-nim.json";
 
     public static void main(String[] args) {
         Collection<Student> rawStudents = importRawStudentData();
@@ -26,7 +26,7 @@ public class Main {
         Collection<Student> merged = merger.merge();
         ProcessResult result = merger.getProcessResult();
         logResult(result);
-        exportStudentDataToCsv(merged);
+        exportStudentDataToJson(merged);
     }
 
     private static final Predicate<? super Student> IS_2010_OR_LATER = new Predicate<Student>() {
@@ -63,12 +63,12 @@ public class Main {
         LOG.log(Level.INFO, builder.toString());
     }
 
-    private static void exportStudentDataToCsv(Collection<Student> students) {
-        StudentDataExporter exporter = new StudentDataExporterToCsv(new File(OUTPUT_FILENAME));
+    private static void exportStudentDataToJson(Collection<Student> students) {
+        StudentDataExporter exporter = new StudentDataExporterToJson(new File(OUTPUT_FILENAME));
         try {
             exporter.exportStudentData(students);
         } catch (ProcessFailureException e) {
-            LOG.log(Level.SEVERE, "Failed when exporting data to CSV", e);
+            LOG.log(Level.SEVERE, "Failed when exporting data to JSON", e);
         }
     }
 
