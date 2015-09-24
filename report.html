@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NIM Finder: Report</title>
+	<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+	<!-- <link href="dist/css/roboto.min.css" rel="stylesheet"> -->
+	<link href="dist/css/material.min.css" rel="stylesheet">
+	<link href="dist/css/chosen.min.css" rel="stylesheet">
+	<link href="dist/css/nim-finder.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<div class="row" style="margin-top: 40px">
+			<div class="well col-lg-6 col-lg-offset-3">
+				<h1 style="margin-bottom: 30px">NIM Finder: Lapor</h1>
+
+				<div class="screen" data-screen="form">
+					<p>Menemukan masalah? Punya kritik atau saran? Sampaikan di sini!</p>
+
+					<div class="form-group">
+						<input type="text" id="email" class="form-control floating-label input-md" placeholder="Email" data-hint="Ini hanya diperlukan jika Anda ingin mendapatkan feedback">
+					</div>
+
+					<div class="form-group">
+						<textarea id="message" class="form-control floating-label auto-resize" placeholder="Tuliskan kritik, saran, masalah, atau apapun di sini!"></textarea>
+					</div>
+
+					<button id="submit" class="btn btn-primary">Kirim</button>
+					<a href="index.html" class="btn btn-default">Kembali ke NIM Finder</a>
+
+					<p id="error-message" hidden></p>
+				</div>
+
+				<div class="screen" data-screen="success" hidden>
+					<h4 class="text-primary">Terima kasih atas masukannya!</h4>
+
+					<a href="index.html" class="btn btn-primary">Kembali ke NIM Finder</a>
+				</div>
+
+				<hr style="margin-top: 40px;">
+				<footer>
+					<small>
+						&copy; 2015 NIM Finder. Powered by <a href="https://parse.com">Parse</a>.
+					</small>
+				</footer>
+			</div>
+		</div>
+
+	</div>
+	<br>
+
+	<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="dist/js/nim-finder-report.min.js"></script>
+</body>
+</html>

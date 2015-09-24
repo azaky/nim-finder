@@ -62,9 +62,9 @@ $(function () {
 			searchResultDom.append(itemDom);
 		});
 		if (results.count > 0) {
-			showSuccessMessage('Showing result ' + results.start + ' to ' + results.end + ' of ' + results.count + ' for <strong>' + result.query.query + '</strong>.');
+			showSuccessMessage('Menunjukkan hasil ' + results.start + ' sampai ' + results.end + ' dari ' + results.count + ' untuk <strong>' + result.query.query + '</strong>.');
 		} else {
-			showSuccessMessage('No result found for <strong>' + result.query.query + '</strong>');
+			showSuccessMessage('Tidak ditemukan hasil untuk <strong>' + result.query.query + '</strong>');
 		}
 		setupPagination(results.page, results.numPages, function(event, page) {
 			var query = $.extend({}, result.query);
