@@ -13,9 +13,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by Toshiba on 9/19/2015.
- */
 public class StudentDataExporterToJson implements StudentDataExporter {
 
     private final File output;
@@ -26,9 +23,11 @@ public class StudentDataExporterToJson implements StudentDataExporter {
 
     @Override
     public void exportStudentData(Collection<Student> students) throws ProcessFailureException {
+        // Sort students according to their batch and faculties to produce nice result
+        List<Student> sortedStudents = FluentIterable.from(students).toSortedList(Student.DEFAULT_COMPARATOR);
         JSONArray result = new JSONArray();
-        for (Student student : students) {
-            result.put(huba(student));
+        for (Student student : sortedStudents) {
+            result.put(getJsonMap(student));
         }
         JSONObject enclosed = new JSONObject();
         enclosed.put("results", result);
@@ -41,7 +40,7 @@ public class StudentDataExporterToJson implements StudentDataExporter {
         }
     }
 
-    private Map<String, Object> huba(Student student) {
+    private Map<String, Object> getJsonMap(Student student) {
         Map<String, Object> result = Maps.newHashMap();
         result.put("name", student.getName());
         result.put("batch", 2000 + (student.getBatch() % 100));

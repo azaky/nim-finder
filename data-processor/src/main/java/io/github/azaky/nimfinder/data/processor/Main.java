@@ -2,6 +2,7 @@ package io.github.azaky.nimfinder.data.processor;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import io.github.azaky.nimfinder.data.Faculties;
 import io.github.azaky.nimfinder.data.Faculty;
 import io.github.azaky.nimfinder.data.Student;
 
@@ -16,17 +17,22 @@ import java.util.logging.Logger;
 public class Main {
 
     public static final Logger LOG = Logger.getLogger("log");
-    public static final String ROOT_DIR = "../crawler/crawled/2015-1";
-    public static final String OUTPUT_FILENAME = "build/all-nim.json";
+    public static final String ROOT_DIR = "../crawler/crawled";
+    public static final String OUTPUT_FILENAME = "build/all-nim";
 
     public static void main(String[] args) {
         Collection<Student> rawStudents = importRawStudentData();
-        Collection<Student> rawStudents2010OrLater = FluentIterable.from(rawStudents).filter(IS_2010_OR_LATER).toSet();
-        StudentDataMerger merger = new StudentDataMerger(rawStudents2010OrLater);
-        Collection<Student> merged = merger.merge();
-        ProcessResult result = merger.getProcessResult();
-        logResult(result);
-        exportStudentDataToJson(merged);
+        Collection<Student> rawStudents2010OrLater = FluentIterable
+                .from(rawStudents)
+                .filter(IS_2010_OR_LATER)
+                .filter(NOT_TPB_2014)
+                .toSet();
+//        StudentDataMerger merger = new StudentDataMerger(rawStudents2010OrLater);
+//        Collection<Student> merged = merger.merge();
+//        ProcessResult result = merger.getProcessResult();
+//        logResult(result);
+        exportStudentDataToJson(rawStudents2010OrLater);
+        exportStudentDataToCsv(rawStudents2010OrLater);
     }
 
     private static final Predicate<? super Student> IS_2010_OR_LATER = new Predicate<Student>() {
@@ -38,6 +44,23 @@ public class Main {
             } else {
                 return batch >= 10;
             }
+        }
+    };
+
+    private static final Predicate<? super Student> NOT_TPB_2014 = new Predicate<Student>() {
+        @Override
+        public boolean apply(Student student) {
+            return student.getBatch() != 2014 || student.getTpbNim() == null;
+        }
+    };
+
+    private static final Predicate<? super Student> IS_165 = new Predicate<Student>() {
+
+        private final Faculty STEI = Faculties.getFromCode("165");
+
+        @Override
+        public boolean apply(Student input) {
+            return input.getTpbNim() != null && input.getTpbNim().getFaculty().equals(STEI);
         }
     };
 
@@ -64,7 +87,16 @@ public class Main {
     }
 
     private static void exportStudentDataToJson(Collection<Student> students) {
-        StudentDataExporter exporter = new StudentDataExporterToJson(new File(OUTPUT_FILENAME));
+        StudentDataExporter exporter = new StudentDataExporterToJson(new File(OUTPUT_FILENAME + ".json"));
+        try {
+            exporter.exportStudentData(students);
+        } catch (ProcessFailureException e) {
+            LOG.log(Level.SEVERE, "Failed when exporting data to JSON", e);
+        }
+    }
+
+    private static void exportStudentDataToCsv(Collection<Student> students) {
+        StudentDataExporter exporter = new StudentDataExporterToCsv(new File(OUTPUT_FILENAME + ".csv"));
         try {
             exporter.exportStudentData(students);
         } catch (ProcessFailureException e) {
