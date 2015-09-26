@@ -21,23 +21,49 @@
 				</div>
 
 				<div id="search-filters">
-					<span id="toggle-filters" data-status="hidden">
-						<span id="toggle-filters-show">
-							<a href="#">Pakai filter ...</a>
-						</span>
-						<span id="toggle-filters-hide" hidden>
-							Batasi pencarian untuk prodi tertentu. <a href="#">Hilangkan filter ...</a>
-						</span>
-					</span>
+					<div class="checkbox checkbox-primary">
+						<label>
+							<input type="checkbox" id="toggle-filter"> Gunakan Filter
+						</label>
+					</div>
 					<div class="collapse" id="filters">
-						<div class="form-group has-success">
-							<select class="form-control" id="filter-select" data-placeholder=" " multiple>
-							</select>
+						<div class="panel">
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-lg-7">
+										Program Studi
+										<div class="form-group">
+											<select class="form-control" id="filter-select" data-placeholder=" " multiple>
+											</select>
+										</div>
+									</div>
+
+									<div class="col-lg-5">
+										Angkatan
+										<div class="form-group">
+											<select class="form-control" id="batch-select" data-placeholder=" " multiple>
+												<option value="2010">2010</option>
+												<option value="2011">2011</option>
+												<option value="2012">2012</option>
+												<option value="2013">2013</option>
+												<option value="2014">2014</option>
+												<option value="2015">2015</option>
+											</select>
+										</div>
+									</div>
+								</div>
+
+								<!--div class="checkbox checkbox-primary">
+									<label>
+										<input type="checkbox"> Pencarian dengan Regex
+									</label>
+								</div-->
+							</div>
 						</div>
 					</div>
 				</div>
 
-				<div id="search-info">
+				<div id="search-info" style="margin-top:20px">
 					<div id="search-info-success" hidden>
 						<h5 id="search-info-success-message"></h5>
 					</div>

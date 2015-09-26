@@ -91,6 +91,7 @@ var _ = require("underscore");
 			response.error("query parameter is required!");
 		} else {
 			var parseQuery = getParseQuery(query);
+			console.log(JSON.stringify(parseQuery));
 			var promiseFind = parseQuery.find();
 			var promiseCount = parseQuery.count();
 		}
@@ -136,13 +137,25 @@ var _ = require("underscore");
 
 	function getNimFilterQuery(filters) {
 		if (filters instanceof Array && filters.length > 0) {
-			var filterQueries = [];
+			var batchFilters = [];
+			var nimRegexString = "";
 			_.each(filters, function(filter) {
-				var filterQuery = new Parse.Query(STUDENT_OBJECT);
-				filterQuery.startsWith("nim", filter);
-				filterQueries.push(filterQuery);
+				if (filter.length && filter.length === 4) {
+					var filterQuery = new Parse.Query(STUDENT_OBJECT);
+					filterQuery.equalTo("batch", parseInt(filter));
+					batchFilters.push(filterQuery);
+				} else {
+					if (nimRegexString.length) {
+						nimRegexString += "|";
+					}
+					nimRegexString += "^" + filter;
+				}
 			});
-			return Parse.Query.or.apply(null, filterQueries);
+			if (batchFilters.length > 0) {
+				return Parse.Query.or.apply(null, batchFilters).matches("nim", new RegExp(nimRegexString));
+			} else {
+				return new Parse.Query(STUDENT_OBJECT).matches("nim", new RegExp(nimRegexString));
+			}
 		} else {
 			return new Parse.Query(STUDENT_OBJECT);
 		}

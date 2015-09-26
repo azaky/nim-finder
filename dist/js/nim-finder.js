@@ -3,8 +3,9 @@ $(function initializeParse() {
 	Parse.initialize(parseKeys.getAppId(), parseKeys.getClientKey());
 });
 
-$(function initializeMaterial() {
+$(function initializeUI() {
 	$.material.init();
+	$('[data-toggle="popover"]').popover();
 });
 
 $(function initializeFacultiesFilter() {
@@ -124,41 +125,49 @@ $(function () {
 		}
 	}
 
-	$('#retry-search-button').on('click', function(e) {
+	$('#retry-search-button').on('click', function() {
 		doSearch(lastQuery);
 	});
 
-	$('#filter-select').on('change', function(e) {
-		s = $(this).val();
+	$('#filter-select,#batch-select').on('change', function() {
 		filters = [];
-		if (s) $.each(s, function(i, code) {
-			filters.push(code);
+		$('#filter-select,#batch-select').each(function() {
+			var s = $(this).val();
+			if (s) $.each(s, function(i, code) {
+				filters.push(code);
+			});
 		});
 
 		doSearchFromInput();
 	});
 
-	$('#toggle-filters a').on('click', function(e) {
-		$('#filters').collapse('toggle');
-		var toggle = $('#toggle-filters');
-		if (toggle.data('status') === "hidden") {
+	$('#toggle-filter').on('change', function(e) {
+		console.log("value = " + $(this).is(':checked'));
+		if ($(this).is(':checked')) {
+			$('#filters').collapse('show');
 			lazilyEnableChosen();
-			$('#toggle-filters-show').hide();
-			$('#toggle-filters-hide').show();
-			toggle.data('status', 'shown');
 			isFilterEnabled = true;
 		} else {
-			$('#toggle-filters-show').show();
-			$('#toggle-filters-hide').hide();
-			toggle.data('status', 'hidden');
+			$('#filters').collapse('hide');
 			isFilterEnabled = false;
 		}
-		doSearchFromInput();
+		if (!isFilterEmpty()) {
+			doSearchFromInput();
+		}
 	});
+
+	function isFilterEmpty() {
+		return !filters || filters.length === 0;
+	}
 
 	function lazilyEnableChosen() {
 		if (chosen === null) {
 			chosen = $('#filter-select').chosen({
+				placeholder_text_multiple: " ",
+				search_contains: true
+			});
+
+			$('#batch-select').chosen({
 				placeholder_text_multiple: " ",
 				search_contains: true
 			});
