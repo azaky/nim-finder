@@ -49,7 +49,8 @@ public class StudentDataExporterToJson implements StudentDataExporter {
             nim = student.getTpbNim();
         }
         result.put("nim", Objects.toString(nim, ""));
-        result.put("search_token", getSearchToken(result.get("name") + " " + result.get("nim")));
+//        result.put("search_token", getSearchToken(result.get("name") + " " + result.get("nim")));
+        result.put("all_data", (Objects.toString(nim, "") + " " + student.getName()).replace(' ', '#'));
         return result;
     }
 

@@ -50,17 +50,7 @@ public class Main {
     private static final Predicate<? super Student> NOT_TPB_2014 = new Predicate<Student>() {
         @Override
         public boolean apply(Student student) {
-            return student.getBatch() != 2014 || student.getTpbNim() == null;
-        }
-    };
-
-    private static final Predicate<? super Student> IS_165 = new Predicate<Student>() {
-
-        private final Faculty STEI = Faculties.getFromCode("165");
-
-        @Override
-        public boolean apply(Student input) {
-            return input.getTpbNim() != null && input.getTpbNim().getFaculty().equals(STEI);
+            return (student.getBatch() % 100) != 14 || student.getTpbNim() == null;
         }
     };
 

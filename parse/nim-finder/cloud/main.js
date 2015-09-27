@@ -127,10 +127,10 @@ var _ = require("underscore");
 	});
 
 	function getParseQuery(query) {
-		var searchTokens = splitQuery(query.query.toLowerCase());
+		var searchTokens = splitQuery(query.query);
 
 		return getNimFilterQuery(query.filters)
-				.containsAll("search_token", searchTokens)
+				.matches("all_data", getSearchRegex(searchTokens))
 				.limit(RESULTS_PER_PAGE)
 				.skip(getNumSkipped(query.page));
 	}
@@ -160,6 +160,23 @@ var _ = require("underscore");
 			return new Parse.Query(STUDENT_OBJECT);
 		}
 	}
+
+	function getSearchRegex(searchTokens) {
+		var regex = "";
+		_.each(searchTokens, function(token) {
+			try {
+				new RegExp(token);
+				regex += "(?=.*" + token + ")";
+			} catch (exception) { // token is not a valid regex
+				regex += "(?=.*" + regexEscape(token) + ")";
+			}
+		});
+		return new RegExp(regex, "gi");
+	}
+
+	function regexEscape(s) {
+		return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
 
 	function getNumSkipped(page) {
 		if (!page) {
