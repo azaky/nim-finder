@@ -19,6 +19,7 @@ dependencies {
     compile 'com.google.code.findbugs:findbugs:3.0.1'
     compile 'com.opencsv:opencsv:3.5'
     compile 'org.json:json:20141113'
+    compile 'mysql:mysql-connector-java:5.1.36'
     testCompile 'junit:junit:4.12'
 }
 
