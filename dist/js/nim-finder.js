@@ -5,8 +5,15 @@ $(function initializeParse() {
 
 $(function initializeUI() {
 	$.material.init();
-	$('[data-toggle="popover"]').popover();
+	$('[data-toggle="tooltip"]').tooltip();
 });
+
+$(function initializeZeroClipboard() {
+	ZeroClipboard = require('./ZeroClipboard');
+	ZeroClipboard.config( { swfPath: "dist/js/ZeroClipboard.swf" } );
+});
+
+var facultyMap = {};
 
 $(function initializeFacultiesFilter() {
 	var faculties = require('./faculties');
@@ -16,6 +23,7 @@ $(function initializeFacultiesFilter() {
 		var optgroup = '<optgroup label="' + faculty.name + '">'
 		$.each(faculty.programs, function(j, program) {
 			optgroup += '<option value="' + program.code + '">' + program.code + ' | ' + program.name + '</option>';
+			facultyMap[program.code] = program.name;
 		});
 		optgroup += '</optgroup>';
 		select.append(optgroup);
@@ -50,18 +58,33 @@ $(function () {
 	function showResult(result) {
 		var searchResultDom = $('#search-result-box');
 		searchResultDom.html('');
-		searchResultDom.show();
-		$('#search-loading-bar').hide();
 
 		var results = result.results;
 		$.each(results.data, function(i, data) {
-			var itemDom = '<div class="search-result">' + 
-								'<a href="javascript:void(0)" class="btn btn-material-green btn-raised btn-block">' +
-									'<h5><strong>' + data.nim + '</strong> - ' + data.name + '</h5>' +
-								'</a>' + 
-							'</div>';
+			var program = facultyMap[data.nim.substr(0, 3)];
+			var itemDom = '' +
+				'<div class="search-result-item panel">' +
+				'	<div class="panel-body">' +
+				'		<div class="row">' +
+				'			<div class="col-lg-12">' +
+				'				<h5>' +
+				'					<span class="nim" data-toggle="tooltip" data-placement="top" title="' + program + '"><strong>' + data.nim + '</strong></span> - <span class="name">' + data.name + '</span>' +
+				'				</h5>' +
+				'			</div>' +
+				'			<div class="col-lg-12">' +
+				'				<button class="btn btn-sm btn-info copy-nim">Copy NIM</button>' +
+				'				<button class="btn btn-sm btn-info copy-name">Copy Nama</button>' +
+				'			</div>' +
+				'		</div>' +
+				'	</div>' +
+				'</div>';
 			searchResultDom.append(itemDom);
 		});
+
+		setSearchItemOnClickListener();
+		searchResultDom.show();
+		$('#search-loading-bar').hide();
+
 		if (results.count > 0) {
 			showSuccessMessage('Menunjukkan hasil ' + results.start + ' sampai ' + results.end + ' dari ' + results.count + ' untuk <strong>' + result.query.query + '</strong>.');
 		} else {
@@ -71,6 +94,41 @@ $(function () {
 			var query = $.extend({}, result.query);
 			query.page = page;
 			doSearch(query);
+		});
+	}
+	function setSearchItemOnClickListener() {
+		$('.search-result-item').each(function() {
+			var nim = $(this).find('.nim').text();
+			var name = $(this).find('.name').text();
+			var copyNimDom = $(this).find('.copy-nim');
+			var copyNameDom = $(this).find('.copy-name');
+			$(this).find('[data-toggle="tooltip"]').tooltip();
+			$(this).find('button').prop('onclick', null);
+
+			var clipNim = new ZeroClipboard(copyNimDom);
+			clipNim.on( "ready", function() {
+				this.on('copy', function(event) {
+					event.clipboardData.setData('text/plain', nim);
+				});
+				this.on( "aftercopy", function( event ) {
+					copyNimDom.html("Copied!");
+					setTimeout(function() {
+						copyNimDom.html("Copy NIM");
+					}, 500);
+				});
+			});
+			var clipName = new ZeroClipboard(copyNameDom);
+			clipName.on( "ready", function() {
+				this.on('copy', function(event) {
+					event.clipboardData.setData('text/plain', name);
+				});
+				this.on( "aftercopy", function( event ) {
+					copyNameDom.html("Copied!");
+					setTimeout(function() {
+						copyNameDom.html("Copy Name");
+					}, 500);
+				});
+			});
 		});
 	}
 
