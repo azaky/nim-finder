@@ -90,8 +90,11 @@ $codes = [
     "190", "192", "197"
 ];
 
-for ($year = 2010; $year <= 2015; ++$year) {
+for ($year = 2014; $year <= 2015; ++$year) {
     for ($semester = 1; $semester <= 2; ++$semester) {
+        if ($year === 2014 && $semester === 1) {
+            continue;
+        }
         if ($year === 2015 && $semester === 2) {
             break;
         }
