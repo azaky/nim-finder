@@ -125,7 +125,7 @@ $(function () {
 				this.on( "aftercopy", function( event ) {
 					copyNameDom.html("Copied!");
 					setTimeout(function() {
-						copyNameDom.html("Copy Name");
+						copyNameDom.html("Copy Nama");
 					}, 500);
 				});
 			});
