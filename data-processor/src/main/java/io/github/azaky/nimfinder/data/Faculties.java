@@ -31,7 +31,9 @@ public class Faculties {
         Preconditions.checkState(isLoaded, "No faculty FacultiesTest has been loaded");
         Faculty faculty = faculties.get(code);
         if (faculty == null) {
-            throw new IllegalArgumentException("No faculty with code " + code + " is found");
+            faculty = new Faculty("Unknown", code, null);
+            faculties.put(code, faculty);
+//            throw new IllegalArgumentException("No faculty with code " + code + " is found");
         }
         return faculty;
     }

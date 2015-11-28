@@ -1,9 +1,11 @@
 package io.github.azaky.nimfinder.data;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 public class Student {
@@ -13,8 +15,14 @@ public class Student {
     private final Nim nim;
     @Nullable
     private final Nim tpbNim;
+    private final List<Nim> nims = Lists.newArrayList();
     private final int batch;
+    private final boolean isAlumni;
 
+    /**
+     * Use constructor with isAlumni instead
+     */
+    @Deprecated
     public Student(String name, @Nullable Nim nim, @Nullable Nim tpbNim) {
         Preconditions.checkArgument(nim == null || !nim.isTpb(), "nim argument must not be TPB NIM");
         Preconditions.checkArgument(tpbNim == null || tpbNim.isTpb(), "tpbNim argument must be TPB NIM");
@@ -26,6 +34,20 @@ public class Student {
         this.nim = nim;
         this.tpbNim = tpbNim;
         this.batch = nim != null ? nim.getBatch() : tpbNim.getBatch();
+        this.isAlumni = false;
+    }
+
+    public Student(String name, Nim nim, List<Nim> nims, boolean isAlumni) {
+        this.name = name;
+        this.nim = nim;
+        this.tpbNim = null;
+        this.nims.addAll(nims);
+        this.batch = nim.getBatch();
+        this.isAlumni = isAlumni;
+    }
+
+    public void addNim(Nim nim) {
+        nims.add(nim);
     }
 
     public String getName() {
@@ -42,6 +64,14 @@ public class Student {
 
     public int getBatch() {
         return batch;
+    }
+
+    public List<Nim> getNims() {
+        return nims;
+    }
+
+    public boolean isAlumni() {
+        return isAlumni;
     }
 
     public static final Comparator<? super Student> DEFAULT_COMPARATOR = new Comparator<Student>() {

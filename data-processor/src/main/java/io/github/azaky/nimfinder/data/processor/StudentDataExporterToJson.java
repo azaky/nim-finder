@@ -1,6 +1,7 @@
 package io.github.azaky.nimfinder.data.processor;
 
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.github.azaky.nimfinder.data.Nim;
@@ -45,12 +46,18 @@ public class StudentDataExporterToJson implements StudentDataExporter {
         result.put("name", student.getName());
         result.put("batch", 2000 + (student.getBatch() % 100));
         Nim nim = student.getNim();
-        if (nim == null) {
-            nim = student.getTpbNim();
-        }
         result.put("nim", Objects.toString(nim, ""));
-//        result.put("search_token", getSearchToken(result.get("name") + " " + result.get("nim")));
-        result.put("all_data", (Objects.toString(nim, "") + " " + student.getName()).replace(' ', '#'));
+        StringBuilder allData = new StringBuilder();
+        List<String> nimsAsString = Lists.newArrayList();
+        for (Nim nimLocal : student.getNims()) {
+            allData.append(nimLocal);
+            allData.append("#");
+            nimsAsString.add(nimLocal.toString());
+        }
+        result.put("nims", nimsAsString);
+        allData.append(student.getName().replace(' ', '#'));
+        result.put("all_data", allData.toString());
+        result.put("is_alumni", student.isAlumni());
         return result;
     }
 

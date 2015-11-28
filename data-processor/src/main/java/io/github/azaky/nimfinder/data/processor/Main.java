@@ -103,7 +103,7 @@ public class Main {
 
     private static Collection<Student> importRawStudentData() {
         File rootFile = new File(ROOT_DIR);
-        StudentDataImporter importer = new StudentDataImporterFromFile(rootFile);
+        StudentDataImporter importer = new StudentDataImporterFromDatabase();
         try {
             return importer.importStudentData();
         } catch (ProcessFailureException e) {
