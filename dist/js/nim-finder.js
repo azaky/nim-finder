@@ -69,6 +69,7 @@ $(function () {
 				'			<div class="col-lg-12">' +
 				'				<h5>' +
 				'					<span class="nim" data-toggle="tooltip" data-placement="top" title="' + program + '"><strong>' + data.nim + '</strong></span> - <span class="name">' + data.name + '</span>' +
+				(data.is_alumni ? ' <img src="dist/images/alumni.png">' : '') +
 				'				</h5>' +
 				'			</div>' +
 				'			<div class="col-lg-12">' +
