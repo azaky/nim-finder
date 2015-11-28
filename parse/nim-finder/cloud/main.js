@@ -105,7 +105,9 @@ var _ = require("underscore");
 					newSearchResult.push({
 						name: student.get("name"),
 						nim: student.get("nim"),
-						batch: student.get("batch")
+						batch: student.get("batch"),
+						nims: student.get("nims"),
+						is_alumni: student.get("is_alumni")
 					})
 				});
 				response.success({
