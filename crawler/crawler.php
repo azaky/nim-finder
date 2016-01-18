@@ -90,11 +90,11 @@ $codes = [
     "190", "192", "197"
 ];
 
-for ($year = 2010; $year <= 2015; ++$year) {
-    for ($semester = 1; $semester <= 2; ++$semester) {
-        if ($year === 2015 && $semester === 2) {
-            break;
-        }
+for ($year = 2015; $year <= 2015; ++$year) {
+    for ($semester = 2; $semester <= 2; ++$semester) {
+        // if ($year === 2015 && $semester === 2) {
+        //     break;
+        // }
         foreach ($codes as $code) {
             // Create new directory special for this faculty
             $directoryName = 'crawled/' . $year . '-' . $semester . '/' . $code;
