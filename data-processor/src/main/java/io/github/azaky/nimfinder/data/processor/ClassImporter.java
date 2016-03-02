@@ -21,7 +21,7 @@ public class ClassImporter {
     public static final String DB_PASSWORD = "password";
     public static final String DB_CLASSPATH = "com.mysql.jdbc.Driver";
 
-    public static final String ROOT_DIR = "../crawler/crawled/";
+    public static final String ROOT_DIR = "../crawler/crawled/2015-2-before-prs";
 
     public static final Logger LOG = Logger.getLogger("log");
 

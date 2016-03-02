@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class Main {
 
     public static final Logger LOG = Logger.getLogger("log");
-    public static final String ROOT_DIR = "../crawler/crawled";
+    public static final String ROOT_DIR = "../crawler/crawled/2015-2-before-prs";
     public static final String OUTPUT_FILENAME = "build/all-nim";
 
     public static void main(String[] args) {
