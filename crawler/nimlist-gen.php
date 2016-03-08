@@ -9,8 +9,12 @@ $db = mysqli_connect($hostname, $username, $password, $dbname);
 
 foreach ($argv as $nim) {
 	$allnim = "";
-	if ($nim == $argv[0]) continue;
-	$sql = "SELECT nim FROM `mahasiswa` WHERE nim LIKE '$nim%'";
+	if ($nim === $argv[0]) continue;
+	if ($nim === "null") {
+		$sql = "SELECT nim FROM `mahasiswa` WHERE status IS NULL";
+	} else {
+		$sql = "SELECT nim FROM `mahasiswa` WHERE nim LIKE '$nim%'";
+	}
 	$query = $db->query($sql);
 	if (!$query) {
 		die ("Terjadi kesalahan pada database. " . mysqli_error());
