@@ -11,36 +11,14 @@ import java.util.Objects;
 public class Student {
 
     private final String name;
-    @Nullable
     private final Nim nim;
-    @Nullable
-    private final Nim tpbNim;
     private final List<Nim> nims = Lists.newArrayList();
     private final int batch;
     private final boolean isAlumni;
 
-    /**
-     * Use constructor with isAlumni instead
-     */
-    @Deprecated
-    public Student(String name, @Nullable Nim nim, @Nullable Nim tpbNim) {
-        Preconditions.checkArgument(nim == null || !nim.isTpb(), "nim argument must not be TPB NIM");
-        Preconditions.checkArgument(tpbNim == null || tpbNim.isTpb(), "tpbNim argument must be TPB NIM");
-        Preconditions.checkArgument(nim != null || tpbNim != null, "At least one of nim or tpbNim must be non-null");
-        if (nim != null && tpbNim != null) {
-            Preconditions.checkArgument(nim.getBatch() == tpbNim.getBatch(), "Batch for nim and tpbNim must be equal");
-        }
-        this.name = name;
-        this.nim = nim;
-        this.tpbNim = tpbNim;
-        this.batch = nim != null ? nim.getBatch() : tpbNim.getBatch();
-        this.isAlumni = false;
-    }
-
     public Student(String name, Nim nim, List<Nim> nims, boolean isAlumni) {
         this.name = name;
         this.nim = nim;
-        this.tpbNim = null;
         this.nims.addAll(nims);
         this.batch = nim.getBatch();
         this.isAlumni = isAlumni;
@@ -56,10 +34,6 @@ public class Student {
 
     public Nim getNim() {
         return nim;
-    }
-
-    public Nim getTpbNim() {
-        return tpbNim;
     }
 
     public int getBatch() {
@@ -82,18 +56,11 @@ public class Student {
             if (batchA != batchB) {
                 return batchA - batchB;
             }
-            String nimA = Objects.toString(studentA.getNim(), null);
-            if (nimA == null) {
-                nimA = Objects.toString(studentA.getTpbNim());
-            }
-            String nimB = Objects.toString(studentB.getNim(), null);
-            if (nimB == null) {
-                nimB = Objects.toString(studentB.getTpbNim());
-            }
+            String nimA = Objects.toString(studentA.getNim());
+            String nimB = Objects.toString(studentB.getNim());
             return String.CASE_INSENSITIVE_ORDER.compare(nimA, nimB);
         }
     };
-
 
     @Override
     public boolean equals(Object o) {
@@ -102,17 +69,22 @@ public class Student {
 
         Student student = (Student) o;
 
-        if (name != null ? !name.equals(student.name) : student.name != null) return false;
-        if (nim != null ? !nim.equals(student.nim) : student.nim != null) return false;
-        return !(tpbNim != null ? !tpbNim.equals(student.tpbNim) : student.tpbNim != null);
-
+//        if (batch != student.batch) return false;
+//        if (isAlumni != student.isAlumni) return false;
+//        if (name != null ? !name.equals(student.name) : student.name != null) return false;
+//        if (nim != null ? !nim.equals(student.nim) : student.nim != null) return false;
+//        return !(nims != null ? !nims.equals(student.nims) : student.nims != null);
+        return !(nim != null ? !nim.equals(student.nim) : student.nim != null);
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (nim != null ? nim.hashCode() : 0);
-        result = 31 * result + (tpbNim != null ? tpbNim.hashCode() : 0);
+//        int result = name != null ? name.hashCode() : 0;
+//        result = 31 * result + (nim != null ? nim.hashCode() : 0);
+//        result = 31 * result + (nims != null ? nims.hashCode() : 0);
+//        result = 31 * result + batch;
+//        result = 31 * result + (isAlumni ? 1 : 0);
+        int result = (nim != null ? nim.hashCode() : 0);
         return result;
     }
 
@@ -121,7 +93,9 @@ public class Student {
         return "Student{" +
                 "name='" + name + '\'' +
                 ", nim=" + nim +
-                ", tpbNim=" + tpbNim +
+                ", nims=" + nims +
+                ", batch=" + batch +
+                ", isAlumni=" + isAlumni +
                 '}';
     }
 }

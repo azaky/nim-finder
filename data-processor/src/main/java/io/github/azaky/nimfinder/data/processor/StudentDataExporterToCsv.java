@@ -20,7 +20,7 @@ import java.util.Set;
 public class StudentDataExporterToCsv implements StudentDataExporter {
 
     private static final char SEPARATOR = ';';
-    private static final String[] HEADER = {"name", "batch", "nim"};
+    private static final String[] HEADER = {"nim", "nama", "angkatan"};
 
     private final File output;
 
@@ -37,12 +37,9 @@ public class StudentDataExporterToCsv implements StudentDataExporter {
             writeHeader(writer);
             writeData(writer, sortedStudent);
             writer.close();
-        } catch (FileNotFoundException e) {
-            throw new ProcessFailureException("Failed to export student FacultiesTest to CSV", e);
         } catch (IOException e) {
             throw new ProcessFailureException("Failed to export student FacultiesTest to CSV", e);
         }
-
     }
 
     private void writeHeader(CSVWriter writer) {
@@ -61,13 +58,9 @@ public class StudentDataExporterToCsv implements StudentDataExporter {
         @Override
         public String[] apply(Student student) {
             String[] row = new String[HEADER.length];
-            row[0] = student.getName();
-            row[1] = String.format("20%02d", student.getBatch() % 100);
-            Nim nim = student.getNim();
-            if (nim == null) {
-                nim = student.getTpbNim();
-            }
-            row[2] = Objects.toString(nim, "");
+            row[0] = Objects.toString(student.getNim());
+            row[1] = student.getName();
+            row[2] = Integer.toString(student.getBatch());
             return row;
         }
     };

@@ -17,6 +17,7 @@ public class Faculties {
     private static final String FACULTIES_JSON_PATH = "resources/main/faculties.json";
 
     /* package for testing */ static final Map<String, Faculty> faculties = Maps.newHashMap();
+    public static final Faculty UNKNOWN = new Faculty("Unknown", "000", null);
     private static boolean isLoaded = false;
 
     static {
@@ -31,11 +32,11 @@ public class Faculties {
         Preconditions.checkState(isLoaded, "No faculty FacultiesTest has been loaded");
         Faculty faculty = faculties.get(code);
         if (faculty == null) {
-            faculty = new Faculty("Unknown", code, null);
-            faculties.put(code, faculty);
+            return UNKNOWN;
 //            throw new IllegalArgumentException("No faculty with code " + code + " is found");
+        } else {
+            return faculty;
         }
-        return faculty;
     }
 
     private static void load() {

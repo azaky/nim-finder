@@ -10,23 +10,20 @@ import io.github.azaky.nimfinder.data.Student;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StudentDataImporterFromFile implements StudentDataImporter {
+public class StudentDataImporterFromDpkFile implements StudentDataImporter {
 
     private static final Logger LOG = Logger.getLogger("log");
     private static final Pattern DPK_STUDENT_PATTERN = Pattern.compile("([0-9]+)\\s+([0-9]+)\\s+(.*)");
 
     private final File dpkDirectoryRoot;
 
-    public StudentDataImporterFromFile(File dpkDirectoryRoot) {
+    public StudentDataImporterFromDpkFile(File dpkDirectoryRoot) {
         Preconditions.checkArgument(
                 Files.isDirectory().apply(dpkDirectoryRoot),
                 "Root directory must exist and must be a directory");
@@ -59,11 +56,7 @@ public class StudentDataImporterFromFile implements StudentDataImporter {
                             try {
                                 Nim nim = Nim.of(matcher.group(2));
                                 String name = matcher.group(3).trim();
-                                if (nim.isTpb()) {
-                                    students.add(new Student(name, null, nim));
-                                } else {
-                                    students.add(new Student(name, nim, null));
-                                }
+                                students.add(new Student(name, nim, Arrays.asList(nim), false));
                             } catch (Exception e) {
                                 LOG.log(Level.WARNING, "Exception occurs when importing from DPK", e);
                             }

@@ -65,14 +65,10 @@ public class ProcessResult {
         public Builder addStudent(Student student) {
             Integer batch = student.getBatch();
             Nim nim = student.getNim();
-            Nim tpbNim = student.getTpbNim();
-            if (nim != null && tpbNim == null) {
+            if (nim.isTpb()) {
+                addResultMetric(batch, nim.getFaculty(), StudentAggregateData.TPB);
+            } else {
                 addResultMetric(batch, nim.getFaculty(), StudentAggregateData.NON_TPB);
-            } else if (nim == null && tpbNim != null) {
-                addResultMetric(batch, tpbNim.getFaculty(), StudentAggregateData.TPB);
-            } else if (nim != null && tpbNim != null) {
-                addResultMetric(batch, nim.getFaculty(), StudentAggregateData.BOTH);
-                addResultMetric(batch, tpbNim.getFaculty(), StudentAggregateData.BOTH);
             }
             return this;
         }

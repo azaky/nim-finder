@@ -24,13 +24,10 @@ public class Main {
         Collection<Student> rawStudents = importRawStudentData();
         Collection<Student> rawStudents2010OrLater = FluentIterable
                 .from(rawStudents)
-                .filter(IS_2010_OR_LATER)
+//                .filter(IS_2010_OR_LATER)
+                .filter(NOT_UNKNOWN_FACULTY)
                 .filter(NOT_TPB_2014)
                 .toSet();
-//        StudentDataMerger merger = new StudentDataMerger(rawStudents2010OrLater);
-//        Collection<Student> merged = merger.merge();
-//        ProcessResult result = merger.getProcessResult();
-//        logResult(result);
         exportStudentDataToJson(rawStudents2010OrLater);
         exportStudentDataToCsv(rawStudents2010OrLater);
     }
@@ -47,10 +44,17 @@ public class Main {
         }
     };
 
+    private static final Predicate<? super Student> NOT_UNKNOWN_FACULTY = new Predicate<Student>() {
+        @Override
+        public boolean apply(Student input) {
+            return !input.getNim().getFaculty().equals(Faculties.UNKNOWN);
+        }
+    };
+
     private static final Predicate<? super Student> NOT_TPB_2014 = new Predicate<Student>() {
         @Override
         public boolean apply(Student student) {
-            return (student.getBatch() % 100) != 14 || student.getTpbNim() == null;
+            return (student.getBatch() != 2014 || !student.getNim().isTpb());
         }
     };
 
@@ -103,7 +107,7 @@ public class Main {
 
     private static Collection<Student> importRawStudentData() {
         File rootFile = new File(ROOT_DIR);
-        StudentDataImporter importer = new StudentDataImporterFromDatabase();
+        StudentDataImporter importer = new StudentDataImporterFromDpkFile(rootFile);
         try {
             return importer.importStudentData();
         } catch (ProcessFailureException e) {

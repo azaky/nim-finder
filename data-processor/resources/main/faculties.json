@@ -180,6 +180,10 @@
       {
         "code": 167,
         "name": "Tahap Tahun Pertama FTI"
+      },
+      {
+        "code": 195,
+        "name": "Tahap Tahun Pertama FTI - Jatinangor"
       }
     ]
   },
@@ -280,6 +284,10 @@
       {
         "code": 166,
         "name": "Tahap Tahun Pertama FTSL"
+      },
+      {
+        "code": 196,
+        "name": "Tahap Tahun Pertama FTSL - Jatinangor"
       }
     ]
   },
