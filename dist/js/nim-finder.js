@@ -35,6 +35,7 @@ $(function () {
 	var filters = [];
 	var isFilterEnabled = false;
 	var chosen = null;
+	var Clipboard = require('./clipboard.min');
 
 	function doSearch(query) {
 		clearScreen();
@@ -73,8 +74,8 @@ $(function () {
 				'				</h5>' +
 				'			</div>' +
 				'			<div class="col-lg-12">' +
-				'				<button class="btn btn-sm btn-info copy-nim">Copy NIM</button>' +
-				'				<button class="btn btn-sm btn-info copy-name">Copy Nama</button>' +
+				'				<button class="btn btn-sm btn-info copy-nim" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy NIM</button>' +
+				'				<button class="btn btn-sm btn-info copy-name" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy Nama</button>' +
 				'			</div>' +
 				'		</div>' +
 				'	</div>' +
@@ -101,35 +102,55 @@ $(function () {
 		$('.search-result-item').each(function() {
 			var nim = $(this).find('.nim').text();
 			var name = $(this).find('.name').text();
-			var copyNimDom = $(this).find('.copy-nim');
-			var copyNameDom = $(this).find('.copy-name');
 			$(this).find('[data-toggle="tooltip"]').tooltip();
 			$(this).find('button').prop('onclick', null);
 
-			var clipNim = new ZeroClipboard(copyNimDom);
-			clipNim.on( "ready", function() {
-				this.on('copy', function(event) {
-					event.clipboardData.setData('text/plain', nim);
-				});
-				this.on( "aftercopy", function( event ) {
-					copyNimDom.html("Copied!");
-					setTimeout(function() {
-						copyNimDom.html("Copy NIM");
-					}, 500);
-				});
+			var clipNim = new Clipboard('.btn.copy-nim', {
+				text: function(trigger) {
+					return $(trigger).parent().parent().find(".nim").text();
+				}
 			});
-			var clipName = new ZeroClipboard(copyNameDom);
-			clipName.on( "ready", function() {
-				this.on('copy', function(event) {
-					event.clipboardData.setData('text/plain', name);
-				});
-				this.on( "aftercopy", function( event ) {
-					copyNameDom.html("Copied!");
-					setTimeout(function() {
-						copyNameDom.html("Copy Nama");
-					}, 500);
-				});
+			clipNim.on('success', function(e) {
+				$(e.trigger).tooltip("show");
+				setTimeout(function() {
+					$(e.trigger).tooltip("hide");
+				}, 500);
 			});
+			var clipName = new Clipboard('.btn.copy-name', {
+				text: function(trigger) {
+					return $(trigger).parent().parent().find(".name").text();
+				}
+			});
+			clipName.on('success', function(e) {
+				$(e.trigger).tooltip("show");
+				setTimeout(function() {
+					$(e.trigger).tooltip("hide");
+				}, 500);
+			});
+			// var clipNim = new ZeroClipboard(copyNimDom);
+			// clipNim.on( "ready", function() {
+			// 	this.on('copy', function(event) {
+			// 		event.clipboardData.setData('text/plain', nim);
+			// 	});
+			// 	this.on( "aftercopy", function( event ) {
+			// 		copyNimDom.html("Copied!");
+			// 		setTimeout(function() {
+			// 			copyNimDom.html("Copy NIM");
+			// 		}, 500);
+			// 	});
+			// });
+			// var clipName = new ZeroClipboard(copyNameDom);
+			// clipName.on( "ready", function() {
+			// 	this.on('copy', function(event) {
+			// 		event.clipboardData.setData('text/plain', name);
+			// 	});
+			// 	this.on( "aftercopy", function( event ) {
+			// 		copyNameDom.html("Copied!");
+			// 		setTimeout(function() {
+			// 			copyNameDom.html("Copy Nama");
+			// 		}, 500);
+			// 	});
+			// });
 		});
 	}
 
