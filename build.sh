@@ -16,9 +16,6 @@ jsobfuscate \
 
 ## combine with others
 browserify \
-	"$dist_dir"/material.min.js \
-	"$dist_dir"/chosen.jquery.min.js \
-	"$dist_dir"/jquery.twbsPagination.min.js \
 	"$dist_dir"/nim-finder.required.min.js \
 	"$dist_dir"/analytics.js \
 	-o "$dist_dir"/nim-finder.bundle.min.js
@@ -45,9 +42,7 @@ jsobfuscate \
 
 ## combine with others
 browserify \
-	"$dist_dir"/material.min.js \
 	"$dist_dir"/nim-finder-report.obfuscated.min.js \
-	"$dist_dir"/material.min.js \
 	-o "$dist_dir"/nim-finder-report.min.js
 
 ## clean up

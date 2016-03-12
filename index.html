@@ -4,10 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>NIM Finder</title>
-	<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
-	<!-- <link href="dist/css/roboto.min.css" rel="stylesheet"> -->
-	<link href="dist/css/material.min.css" rel="stylesheet">
-	<link href="dist/css/chosen.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.9/css/bootstrap-material-design.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.min.css">
 	<link href="dist/css/nim-finder.css" rel="stylesheet">
 </head>
 <body>
@@ -16,15 +15,18 @@
 			<div class="well col-lg-6 col-lg-offset-3">
 				<h1 style="margin-bottom: 30px">NIM Finder</h1>
 
-				<div class="form-group has-info">
-					<input class="form-control floating-label input-lg" id="search-query" type="text" placeholder="Cari Nama atau NIM">
+				<div class="form-group has-info label-floating">
+					<label class="control-label" for="search-query">Cari Nama atau NIM</label>
+					<input class="form-control input-lg" id="search-query" type="text">
 				</div>
 
 				<div id="search-filters">
-					<div class="checkbox checkbox-info">
-						<label>
-							<input type="checkbox" id="toggle-filter"> Gunakan Filter
-						</label>
+					<div class="form-group has-info">
+						<div class="checkbox checkbox-info">
+							<label>
+								<input type="checkbox" id="toggle-filter"> Gunakan Filter
+							</label>
+						</div>
 					</div>
 					<div class="collapse" id="filters">
 						<div class="panel">
@@ -42,22 +44,10 @@
 										Angkatan
 										<div class="form-group">
 											<select class="form-control" id="batch-select" data-placeholder=" " multiple>
-												<option value="2010">2010</option>
-												<option value="2011">2011</option>
-												<option value="2012">2012</option>
-												<option value="2013">2013</option>
-												<option value="2014">2014</option>
-												<option value="2015">2015</option>
 											</select>
 										</div>
 									</div>
 								</div>
-
-								<!--div class="checkbox checkbox-primary">
-									<label>
-										<input type="checkbox"> Pencarian dengan Regex
-									</label>
-								</div-->
 							</div>
 						</div>
 					</div>
@@ -95,8 +85,12 @@
 	<br>
 
 	<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
-	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.9/js/material.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.2.5/jquery.twbsPagination.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.9/clipboard.min.js"></script>
 	<script type="text/javascript" src="dist/js/nim-finder.bundle.min.js"></script>
 </body>
 </html>

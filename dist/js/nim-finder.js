@@ -1,41 +1,77 @@
-$(function initializeParse() {
-	var parseKeys = require('./parse-keys');
-	Parse.initialize(parseKeys.getAppId(), parseKeys.getClientKey());
-});
-
-$(function initializeUI() {
-	$.material.init();
-	$('[data-toggle="tooltip"]').tooltip();
-});
-
-$(function initializeZeroClipboard() {
-	ZeroClipboard = require('./ZeroClipboard');
-	ZeroClipboard.config( { swfPath: "dist/js/ZeroClipboard.swf" } );
-});
-
-var facultyMap = {};
-
-$(function initializeFacultiesFilter() {
-	var faculties = require('./faculties');
-	var select = $('#filter-select');
-
-	$.each(faculties, function(i, faculty) {
-		var optgroup = '<optgroup label="' + faculty.name + '">'
-		$.each(faculty.programs, function(j, program) {
-			optgroup += '<option value="' + program.code + '">' + program.code + ' | ' + program.name + '</option>';
-			facultyMap[program.code] = program.name;
-		});
-		optgroup += '</optgroup>';
-		select.append(optgroup);
-	});
-});
-
-$(function () {
+$(function() {
+	var facultyMap = {};
 	var lastQuery = null;
 	var filters = [];
 	var isFilterEnabled = false;
 	var chosen = null;
-	var Clipboard = require('./clipboard.min');
+
+	function init() {
+		initParse();
+		initUI();
+		initFilter();
+		initClipboard();
+	}
+
+	function initParse() {
+		var parseKeys = require('./parse-keys');
+		Parse.initialize(parseKeys.getAppId(), parseKeys.getClientKey());
+	}
+
+	function initUI() {
+		$.material.init();
+		$('body').tooltip({
+			selector: '[data-toggle=tooltip]:not([data-trigger=manual])'
+		});
+	}
+
+	function initClipboard() {
+		var success = function(e) {
+			$(e.trigger).tooltip("show");
+			setTimeout(function() {
+				$(e.trigger).tooltip("hide");
+			}, 500);
+		};
+		var clipNim = new Clipboard('.btn.copy-nim', {
+			text: function(trigger) {
+				return $(trigger).closest('.search-result-item').find(".nim").text();
+			}
+		});
+		var clipName = new Clipboard('.btn.copy-name', {
+			text: function(trigger) {
+				return $(trigger).closest('.search-result-item').find(".name").text();
+			}
+		});
+		clipNim.on('success', success);
+		clipName.on('success', success);
+	}
+
+	function initFilter() {
+		var faculties = require('./faculties');
+
+		$.each(faculties, function(i, faculty) {
+			var optgroup = '<optgroup label="' + faculty.name + '">'
+			$.each(faculty.programs, function(j, program) {
+				optgroup += '<option value="' + program.code + '">' + program.code + ' | ' + program.name + '</option>';
+				facultyMap[program.code] = program.name;
+			});
+			optgroup += '</optgroup>';
+			$('#filter-select').append(optgroup);
+		});
+
+		for (var i = 2010; i <= 2015; ++i) {
+			$('#batch-select').append('<option value="' + i + '">' + i + '</option>');
+		}
+	}
+
+	function doSearchFromInput() {
+		var query = $('#search-query').val();
+		if (query.length > 0) {
+			doSearch({
+				query: query,
+				page: 1
+			});
+		}
+	}
 
 	function doSearch(query) {
 		clearScreen();
@@ -51,7 +87,6 @@ $(function () {
 
 	function clearScreen() {
 		$('#search-loading-bar').show();
-		// TODO: Add smooth fade out/scroll
 		$('#search-info').hide();
 		$('#search-result-box').hide();
 	}
@@ -62,29 +97,10 @@ $(function () {
 
 		var results = result.results;
 		$.each(results.data, function(i, data) {
-			var program = facultyMap[data.nim.substr(0, 3)];
-			var itemDom = '' +
-				'<div class="search-result-item panel">' +
-				'	<div class="panel-body">' +
-				'		<div class="row">' +
-				'			<div class="col-lg-12">' +
-				'				<h5>' +
-				'					<span class="nim" data-toggle="tooltip" data-placement="top" title="' + program + '"><strong>' + data.nim + '</strong></span> - <span class="name">' + data.name + '</span>' +
-				(data.is_alumni ? ' <img src="dist/images/alumni.png">' : '') +
-				'				</h5>' +
-				'			</div>' +
-				'			<div class="col-lg-12">' +
-				'				<button class="btn btn-sm btn-info copy-nim" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy NIM</button>' +
-				'				<button class="btn btn-sm btn-info copy-name" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy Nama</button>' +
-				'			</div>' +
-				'		</div>' +
-				'	</div>' +
-				'</div>';
-			searchResultDom.append(itemDom);
+			searchResultDom.append(renderItem(data));
 		});
-
-		setSearchItemOnClickListener();
 		searchResultDom.show();
+
 		$('#search-loading-bar').hide();
 
 		if (results.count > 0) {
@@ -98,60 +114,19 @@ $(function () {
 			doSearch(query);
 		});
 	}
-	function setSearchItemOnClickListener() {
-		$('.search-result-item').each(function() {
-			var nim = $(this).find('.nim').text();
-			var name = $(this).find('.name').text();
-			$(this).find('[data-toggle="tooltip"]').tooltip();
-			$(this).find('button').prop('onclick', null);
 
-			var clipNim = new Clipboard('.btn.copy-nim', {
-				text: function(trigger) {
-					return $(trigger).parent().parent().find(".nim").text();
-				}
-			});
-			clipNim.on('success', function(e) {
-				$(e.trigger).tooltip("show");
-				setTimeout(function() {
-					$(e.trigger).tooltip("hide");
-				}, 500);
-			});
-			var clipName = new Clipboard('.btn.copy-name', {
-				text: function(trigger) {
-					return $(trigger).parent().parent().find(".name").text();
-				}
-			});
-			clipName.on('success', function(e) {
-				$(e.trigger).tooltip("show");
-				setTimeout(function() {
-					$(e.trigger).tooltip("hide");
-				}, 500);
-			});
-			// var clipNim = new ZeroClipboard(copyNimDom);
-			// clipNim.on( "ready", function() {
-			// 	this.on('copy', function(event) {
-			// 		event.clipboardData.setData('text/plain', nim);
-			// 	});
-			// 	this.on( "aftercopy", function( event ) {
-			// 		copyNimDom.html("Copied!");
-			// 		setTimeout(function() {
-			// 			copyNimDom.html("Copy NIM");
-			// 		}, 500);
-			// 	});
-			// });
-			// var clipName = new ZeroClipboard(copyNameDom);
-			// clipName.on( "ready", function() {
-			// 	this.on('copy', function(event) {
-			// 		event.clipboardData.setData('text/plain', name);
-			// 	});
-			// 	this.on( "aftercopy", function( event ) {
-			// 		copyNameDom.html("Copied!");
-			// 		setTimeout(function() {
-			// 			copyNameDom.html("Copy Nama");
-			// 		}, 500);
-			// 	});
-			// });
+	function renderItem(data) {
+		var item = template;
+		$.each({
+			program: facultyMap[data.nim.substr(0, 3)] || "Unknown",
+			name: data.name,
+			nim: data.nim,
+			nims: JSON.stringify(data.nims).replace(/"/g, "'"),
+			is_alumni: data.is_alumni ? ' <img src="dist/images/alumni.png" data-toggle="tooltip" data-placement="top" title="Alumni">' : ''
+		}, function(key, value) {
+			item = item.replace("{{" + key + "}}", value);
 		});
+		return item;
 	}
 
 	function showSuccessMessage(message) {
@@ -162,7 +137,7 @@ $(function () {
 	}
 
 	function setupPagination(page, numPages, onPageClick) {
-		$('#pagination').html('<ul></ul>'); // reinitialization is not supported
+		$('#pagination').html('<ul></ul>');
 		if (numPages > 0) {
 			$('#pagination ul').twbsPagination({
 				totalPages: numPages,
@@ -180,61 +155,15 @@ $(function () {
 	function showError(error) {
 		$('#search-loading-bar').hide();
 		$('#pagination').html('<ul></ul>');
-		showErrorMessage(error.message);
+		showErrorMessage(error.code);
 	}
-
+	
 	function showErrorMessage(message) {
 		$('#search-info').show();
 		$('#search-info-error').show();
 		$('#search-info-error-message').html(message);
 		$('#search-info-success').hide();
 	}
-
-	$('#search-query').on('change', function(e) {
-		$(this).blur();
-		doSearchFromInput();
-	});
-
-	function doSearchFromInput() {
-		var query = $('#search-query').val();
-		if (query.length > 0) {
-			doSearch({
-				query: query,
-				page: 1
-			});
-		}
-	}
-
-	$('#retry-search-button').on('click', function() {
-		doSearch(lastQuery);
-	});
-
-	$('#filter-select,#batch-select').on('change', function() {
-		filters = [];
-		$('#filter-select,#batch-select').each(function() {
-			var s = $(this).val();
-			if (s) $.each(s, function(i, code) {
-				filters.push(code);
-			});
-		});
-
-		doSearchFromInput();
-	});
-
-	$('#toggle-filter').on('change', function(e) {
-		console.log("value = " + $(this).is(':checked'));
-		if ($(this).is(':checked')) {
-			$('#filters').collapse('show');
-			lazilyEnableChosen();
-			isFilterEnabled = true;
-		} else {
-			$('#filters').collapse('hide');
-			isFilterEnabled = false;
-		}
-		if (!isFilterEmpty()) {
-			doSearchFromInput();
-		}
-	});
 
 	function isFilterEmpty() {
 		return !filters || filters.length === 0;
@@ -254,4 +183,88 @@ $(function () {
 		}
 	}
 
+	function toggleNim(e) {
+		var nims = $(e).data("nims").split(/[^\w]+/);
+		var currentNim = $(e).html();
+		console.log(nims);
+		console.log(currentNim);
+		var i = 0;
+		while (i < nims.length) {
+			if (currentNim == nims[i]) {
+				break;
+			}
+			++i;
+		}
+		if (i < nims.length) {
+			while (true) {
+				++i;
+				if (i == nims.length) {
+					i = 0;
+				}
+				if (nims[i].length) {
+					break;
+				}
+			}
+			$(e).html(nims[i]);
+		}
+	}
+
+	var template = ' \
+			<div class="search-result-item panel"> \
+				<div class="panel-body"> \
+					<div class="row"> \
+						<div class="col-lg-12"> \
+							<h5> \
+								<strong><a href="javascript:void(0)" class="nim" data-nims="{{nims}}" data-toggle="tooltip" data-placement="top" title="{{program}}">{{nim}}</a></strong> - <span class="name">{{name}}</span>{{is_alumni}} \
+							</h5> \
+						</div> \
+						<div class="col-lg-12"> \
+							<button class="btn btn-sm btn-raised btn-info copy-nim" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy NIM</button> \
+							<button class="btn btn-sm btn-raised btn-info copy-name" data-toggle="tooltip" data-trigger="manual" title="Copied!">Copy Nama</button> \
+						</div> \
+					</div> \
+				</div> \
+			</div>';
+
+	$('#search-query').on('change', function(e) {
+		$(this).blur();
+		doSearchFromInput();
+	});
+
+	$('#retry-search-button').on('click', function() {
+		doSearch(lastQuery);
+	});
+
+	$('#filter-select,#batch-select').on('change', function() {
+		filters = [];
+		$('#filter-select,#batch-select').each(function() {
+			var s = $(this).val();
+			if (s) $.each(s, function(i, code) {
+				filters.push(code);
+			});
+		});
+
+		doSearchFromInput();
+	});
+
+	$('#toggle-filter').on('change', function(e) {
+		if ($(this).is(':checked')) {
+			$('#filters').collapse('show');
+			lazilyEnableChosen();
+			isFilterEnabled = true;
+		} else {
+			$('#filters').collapse('hide');
+			isFilterEnabled = false;
+		}
+		if (!isFilterEmpty()) {
+			doSearchFromInput();
+		}
+	});
+
+	$('body').on('click', '.nim', function() {
+		console.log("DIPANGGIL NIH")
+		toggleNim(this);
+	});
+
+	init();
 });
