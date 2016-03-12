@@ -1,24 +1,31 @@
-/* SnackbarJS - MIT LICENSE (https://github.com/FezVrasta/snackbarjs/blob/master/LICENSE.md) */
-(function(c){function d(a){return"undefined"!==typeof a&&null!==a?!0:!1}c(document).ready(function(){c("body").append("<div id=snackbar-container/>")});c(document).on("click","[data-toggle=snackbar]",function(){c(this).snackbar("toggle")}).on("click","#snackbar-container .snackbar",function(){c(this).snackbar("hide")});c.snackbar=function(a){if(d(a)&&a===Object(a)){var b;b=d(a.id)?c("#"+a.id):c("<div/>").attr("id","snackbar"+Date.now()).attr("class","snackbar");var g=b.hasClass("snackbar-opened");d(a.style)?b.attr("class","snackbar "+a.style):b.attr("class","snackbar");a.timeout=d(a.timeout)?a.timeout:3E3;d(a.content)&&(b.find(".snackbar-content").length?b.find(".snackbar-content").text(a.content):b.prepend("<span class=snackbar-content>"+a.content+"</span>"));d(a.id)?b.insertAfter("#snackbar-container .snackbar:last-child"):b.appendTo("#snackbar-container");d(a.action)&&"toggle"==a.action&&(a.action=g?"hide":"show");var e=Date.now();b.data("animationId1",e);setTimeout(function(){b.data("animationId1")===e&&(d(a.action)&&"show"!=a.action?d(a.action)&&"hide"==a.action&&b.removeClass("snackbar-opened"):b.addClass("snackbar-opened"))},50);var f=Date.now();b.data("animationId2",f);0!==a.timeout&&setTimeout(function(){b.data("animationId2")===f&&b.removeClass("snackbar-opened")},a.timeout);return b}return!1};c.fn.snackbar=function(a){var b={};if(this.hasClass("snackbar")){b.id=this.attr("id");if("show"===a||"hide"===a||"toggle"==a)b.action=a;return c.snackbar(b)}d(a)&&"show"!==a&&"hide"!==a&&"toggle"!=a||(b={content:c(this).attr("data-content"),style:c(this).attr("data-style"),timeout:c(this).attr("data-timeout")});d(a)&&(b.id=this.attr("data-snackbar-id"),"show"===a||"hide"===a||"toggle"==a)&&(b.action=a);a=c.snackbar(b);this.attr("data-snackbar-id",a.attr("id"));return a}})(jQuery);
-
 $(function() {
 	var facultyMap = {};
 	var lastQuery = null;
 	var filters = [];
 	var isFilterEnabled = false;
 	var chosen = null;
-	var snackbar = null;
+	var clients = [];
+	var indexes = [];
 
 	function init() {
-		initParse();
+		initAlgolia();
 		initUI();
 		initFilter();
 		initClipboard();
 	}
 
-	function initParse() {
-		var parseKeys = require('./parse-keys');
-		Parse.initialize(parseKeys.getAppId(), parseKeys.getClientKey());
+	function initAlgolia() {
+		var algoliaKeys = require('./algolia-keys');
+		$.each(algoliaKeys, function(i, key) {
+			try {
+				var client = algoliasearch(key.appId, key.apiKey);
+				var index = client.initIndex('mahasiswa');
+				clients.push(client);
+				indexes.push(index);
+			} catch (e) {
+				console.log(e);
+			}
+		});
 	}
 
 	function initUI() {
@@ -62,7 +69,7 @@ $(function() {
 			$('#filter-select').append(optgroup);
 		});
 
-		for (var i = 2010; i <= 2015; ++i) {
+		for (var i = 2011; i <= 2013; ++i) {
 			$('#batch-select').append('<option value="' + i + '">' + i + '</option>');
 		}
 	}
@@ -77,23 +84,26 @@ $(function() {
 		}
 	}
 
-	function doSearch(query) {
-		clearScreen();
-		if (isFilterEnabled) {
-			query.filters = filters;
-		}
-		lastQuery = query;
-		Parse.Cloud.run('search', query, {
-			success: showResult,
-			error: showError
+	function doSearch(rawquery) {
+		query = buildQuery(rawquery);
+		lastQuery = rawquery;
+		$.each(indexes, function(i, index) {
+			index.search(query)
+				.then(showResult)
+				.catch(showError);
 		});
-		if (!snackbar) {
-			snackbar = $.snackbar({
-				content: 'NIM Finder akan migrasi ke <img src="dist/images/algolia/Algolia_logo_bg-dark.svg" height=15> dalam waktu dekat ini. <a class="text-info" href="index-algolia.html">Coba versi betanya</a>',
-				timeout: 0,
-				htmlAllowed: true
-			});
+	}
+
+	function buildQuery(rawquery) {
+		var query = {
+			query: rawquery.query || "",
+			page: (rawquery.page || 1) - 1,
+			hitsPerPage: 10
+		};
+		if (isFilterEnabled && filters.length) {
+			query.tagFilters = filters;
 		}
+		return query;
 	}
 
 	function clearScreen() {
@@ -106,22 +116,23 @@ $(function() {
 		var searchResultDom = $('#search-result-box');
 		searchResultDom.html('');
 
-		var results = result.results;
-		$.each(results.data, function(i, data) {
+		$.each(result.hits, function(i, data) {
 			searchResultDom.append(renderItem(data));
 		});
 		searchResultDom.show();
 
 		$('#search-loading-bar').hide();
 
-		if (results.count > 0) {
-			showSuccessMessage('Menunjukkan hasil ' + results.start + ' sampai ' + results.end + ' dari ' + results.count + ' untuk <strong>' + result.query.query + '</strong>.');
+		if (result.nbHits > 0) {
+			showSuccessMessage('Menunjukkan hasil ' + (result.page * result.hitsPerPage + 1) + ' sampai ' + (Math.min((result.page + 1) * result.hitsPerPage, result.nbHits)) + ' dari ' + result.nbHits + ' untuk <strong>' + result.query + '</strong>.');
 		} else {
-			showSuccessMessage('Tidak ditemukan hasil untuk <strong>' + result.query.query + '</strong>');
+			showSuccessMessage('Tidak ditemukan hasil untuk <strong>' + result.query + '</strong>');
 		}
-		setupPagination(results.page, results.numPages, function(event, page) {
-			var query = $.extend({}, result.query);
-			query.page = page;
+		setupPagination(result.page + 1, result.nbPages, function(event, page) {
+			var query = {
+				query: result.query,
+				page: page
+			};
 			doSearch(query);
 		});
 	}
@@ -130,10 +141,10 @@ $(function() {
 		var item = template;
 		$.each({
 			program: facultyMap[data.nim.substr(0, 3)] || "Unknown",
-			name: data.name,
+			name: data.nama,
 			nim: data.nim,
 			nims: JSON.stringify(data.nims).replace(/"/g, "'"),
-			is_alumni: data.is_alumni ? ' <img src="dist/images/alumni.png" data-toggle="tooltip" data-placement="top" title="Alumni">' : ''
+			is_alumni: data.status == "Alumni" ? ' <img src="dist/images/alumni.png" data-toggle="tooltip" data-placement="top" title="Alumni">' : ''
 		}, function(key, value) {
 			item = item.replace("{{" + key + "}}", value);
 		});
@@ -235,7 +246,11 @@ $(function() {
 				</div> \
 			</div>';
 
+	$('#search-query').on('keyup', function(e) {
+		doSearchFromInput();
+	});
 	$('#search-query').on('change', function(e) {
+		// hide keyboard in mobilie
 		$(this).blur();
 		doSearchFromInput();
 	});
@@ -245,13 +260,27 @@ $(function() {
 	});
 
 	$('#filter-select,#batch-select').on('change', function() {
-		filters = [];
-		$('#filter-select,#batch-select').each(function() {
+		codeFilter = [];
+		$('#filter-select').each(function() {
 			var s = $(this).val();
 			if (s) $.each(s, function(i, code) {
-				filters.push(code);
+				codeFilter.push(code);
 			});
 		});
+		batchFilter = [];
+		$('#batch-select').each(function() {
+			var s = $(this).val();
+			if (s) $.each(s, function(i, code) {
+				batchFilter.push(code);
+			});
+		});
+		filters = [];
+		if (codeFilter.length) {
+			filters.push(codeFilter);
+		}
+		if (batchFilter.length) {
+			filters.push(batchFilter);
+		}
 
 		doSearchFromInput();
 	});
