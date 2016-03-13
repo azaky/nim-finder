@@ -69,7 +69,7 @@ $(function() {
 			$('#filter-select').append(optgroup);
 		});
 
-		for (var i = 2011; i <= 2013; ++i) {
+		for (var i = 2011; i <= 2015; ++i) {
 			$('#batch-select').append('<option value="' + i + '">' + i + '</option>');
 		}
 	}

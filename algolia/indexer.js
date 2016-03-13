@@ -1,9 +1,16 @@
 var mysql = require('mysql');
-var _ = require('underscore');
-var dbcredentials = require('./dbcredentials');
-var connection = mysql.createConnection(dbcredentials);
+var algoliasearch = require('algoliasearch');
+var _ = require('lodash');
+var async = require('async');
 
-var query = "SELECT * FROM `mahasiswa` WHERE `angkatan` <= 2013 AND `angkatan` >= 2011";
+var dbcredentials = require('./dbcredentials');
+var algoliacredentials = require('./algoliacredentials');
+
+var connection = mysql.createConnection(dbcredentials);
+var client = algoliasearch(algoliacredentials.appId, algoliacredentials.adminApiKey);
+var index = client.initIndex('mahasiswa');
+
+var query = "SELECT * FROM `mahasiswa`";
 connection.query(query, function(err, rows, fields) {
 	if (err) throw err;
 
@@ -16,6 +23,7 @@ connection.query(query, function(err, rows, fields) {
 					return nim.match(/\w{8}/);
 				})
 		result.push({
+			objectID: row.nim,
 			nim: row.nim,
 			nims: nims,
 			nama: row.nama,
@@ -28,7 +36,16 @@ connection.query(query, function(err, rows, fields) {
 });
 
 function process(result) {
-	console.log(JSON.stringify(result));
+	var chunkedResult = _.chunk(result, 1000);
+	async.each(chunkedResult, index.saveObjects.bind(index), end);
+}
+
+function end(err) {
+	if (err) {
+		throw err;
+	}
+
+	console.log('Indexing done');
 }
 
 connection.end();
