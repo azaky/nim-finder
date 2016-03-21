@@ -6,6 +6,7 @@ $(function() {
 	var chosen = null;
 	var clients = [];
 	var indexes = [];
+	var cache = {};
 
 	function init() {
 		initAlgolia();
@@ -23,7 +24,7 @@ $(function() {
 				clients.push(client);
 				indexes.push(index);
 			} catch (e) {
-				console.log(e);
+				console.log(e.message);
 			}
 		});
 	}
@@ -84,14 +85,54 @@ $(function() {
 		}
 	}
 
-	function doSearch(rawquery) {
+	function doSearch(rawquery, samequery) {
 		query = buildQuery(rawquery);
 		lastQuery = rawquery;
-		$.each(indexes, function(i, index) {
-			index.search(query)
-				.then(showResult)
-				.catch(showError);
-		});
+		if (samequery) {
+			var i = 0;
+			var pageoffset = 0;
+			while (i < indexes.length && cache.pages[i] <= query.page) {
+				query.page -= cache.pages[i];
+				pageoffset += cache.pages[i];
+				++i;
+			}
+			if (i >= indexes.length) {
+				console.log("Invalid page: " + rawquery.page);
+			} else {
+				indexes[i].search(query).then(function(result) {
+					result.nbHits = cache.nbHits;
+					result.nbPages = cache.nbPages;
+					result.page += pageoffset;
+					showResult(result);
+				}, showError);
+			}
+		} else {
+			var promises = [];
+			$.each(indexes, function(i, index) {
+				var promise = index.search(query);
+				promises.push(promise);
+			});
+			Promise.all(promises).then(function(values) {
+				cache.pages = [];
+				var ret = values[0];
+				cache.pages.push(ret.nbPages);
+				$.each(values.slice(1), function(i, result) {
+					if (ret.hits.length == 0) {
+						ret.hits = result.hits;
+					}
+					ret.nbHits += result.nbHits;
+					ret.nbPages += result.nbPages;
+					cache.pages.push(result.nbPages);
+					ret.processingTimeMS = Math.max(ret.processingTimeMS, result.processingTimeMS);
+				});
+				cache.nbHits = ret.nbHits;
+				cache.nbPages = ret.nbPages;
+				console.log(JSON.stringify(cache));
+				showResult(ret);
+			}, function(err) {
+				showError(err);
+			});
+		}
 	}
 
 	function buildQuery(rawquery) {
@@ -133,7 +174,7 @@ $(function() {
 				query: result.query,
 				page: page
 			};
-			doSearch(query);
+			doSearch(query, true);
 		});
 	}
 
@@ -159,9 +200,9 @@ $(function() {
 	}
 
 	function setupPagination(page, numPages, onPageClick) {
-		$('#pagination').html('<ul></ul>');
+		$('.paginazion').html('<ul></ul>');
 		if (numPages > 0) {
-			$('#pagination ul').twbsPagination({
+			$('.paginazion ul').twbsPagination({
 				totalPages: numPages,
 				visiblePages: 5,
 				startPage: page,
@@ -177,7 +218,7 @@ $(function() {
 	function showError(error) {
 		$('#search-loading-bar').hide();
 		$('#pagination').html('<ul></ul>');
-		showErrorMessage(error.code);
+		showErrorMessage(error.message);
 	}
 	
 	function showErrorMessage(message) {
