@@ -13,12 +13,7 @@
 	<div class="container">
 		<div class="row" style="margin-top: 40px">
 			<div class="well col-lg-6 col-lg-offset-3">
-				<div style="margin-bottom: 30px"><span style="font-size:36px">NIM Finder</span> <span class="label label-default">Beta</span></div>
-
-				<div class="alert alert-dismissible alert-info">
-					<button type="button" class="close" data-dismiss="alert">×</button>
-					Pada versi beta ini, hasil akan ditampilkan secara <em>real-time</em>, serta lebih toleran terhadap kesalahan pengetikan.
-				</div>
+				<h1 style="margin-bottom: 30px">NIM Finder</h1>
 
 				<div class="form-group has-info label-floating">
 					<label class="control-label" for="search-query">Cari Nama atau NIM</label>
@@ -73,16 +68,14 @@
 					<img src="dist/images/ajax-loader-info.gif">
 				</div>
 
-				<div class="paginazion center"></div>
-
 				<div id="search-result-box"	></div>
 
-				<div class="paginazion center"></div>
+				<div id="pagination" class="center"></div>
 
 				<hr style="margin-top: 40px;">
 				<footer>
 					<small>
-						&copy; 2015 NIM Finder oleh <a class="text-info" href="http://github.com/azaky">Ahmad Zaky</a>. Menemukan kesalahan? <a class="text-info" href="report.html">Laporkan!</a>. Powered by <a class="text-info" href="https://algolia.com"><img src="dist/images/algolia/Algolia_logo_bg-white.svg" height=15></a>. 
+						&copy; 2015 NIM Finder oleh <a class="text-info" href="http://github.com/azaky">Ahmad Zaky</a>. Powered by <a class="text-info" href="https://parse.com">Parse</a>. Menemukan kesalahan? <a class="text-info" href="report.html">Laporkan!</a>
 					</small>
 				</footer>
 			</div>
@@ -91,13 +84,13 @@
 	</div>
 	<br>
 
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+	<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.5.9/js/material.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.2.5/jquery.twbsPagination.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.9/clipboard.min.js"></script>
-	<script type="text/javascript" src="dist/js/nim-finder.algolia.bundle.min.js"></script>
+	<script type="text/javascript" src="dist/js/nim-finder.bundle.min.js"></script>
 </body>
 </html>
