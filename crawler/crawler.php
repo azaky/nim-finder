@@ -19,7 +19,7 @@ class MyCrawler extends PHPCrawler
 
     function handleDocumentInfo($DocInfo)
     {
-        // Just detect linebreak for output ("\n" in CLI-mode, otherwise "<br>").
+        // For linebreaks
         if (PHP_SAPI == "cli") $lb = "\n";
         else $lb = "<br />";
 
@@ -52,7 +52,8 @@ class MyCrawler extends PHPCrawler
                 }
             }
         } else {
-            echo "Content not received" . $lb;
+            // var_dump($DocInfo);
+            echo "Content not received. Error: " . $DocInfo->error_string . $lb;
         }
 
 
@@ -75,7 +76,7 @@ $codes = [
     // FITB
     "120", "128", "129", "151", "163",
     // FTI
-    "130", "133", "134", "144", "167", "195",
+    "130", "133", "134", "143", "144", "145", "167", "195",
     // STEI
     "132", "135", "165", "180", "181", "182", "183",
     // FTMD
@@ -90,8 +91,8 @@ $codes = [
     "190", "192", "197"
 ];
 
-for ($year = 2015; $year <= 2015; ++$year) {
-    for ($semester = 2; $semester <= 2; ++$semester) {
+for ($year = 2016; $year <= 2016; ++$year) {
+    for ($semester = 1; $semester <= 1; ++$semester) {
         // if ($year === 2015 && $semester === 2) {
         //     break;
         // }
@@ -123,7 +124,7 @@ for ($year = 2015; $year <= 2015; ++$year) {
             $res = $crawler->addURLFilterRule("#displayprodikelas.php# i");
 
             // Thats enough, now here we go
-            echo "Start crawling for year " . $year . " semester " . $semester;
+            echo "Start crawling for year " . $year . " semester " . $semester . $lb;
             $crawler->go();
 
             // At the end, after the process is finished, we print a short
